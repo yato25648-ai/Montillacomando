@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#050a05">
+<title>GENERADOR PROGRAMACIÓN // MONTILLA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#060d06;--panel:#0a140a;--panel2:#0d1a0d;
+  --border:#1a3a1a;--border2:#1e3a1e;
+  --green:#00ff41;--green2:#00c832;--green3:#007a1f;
+  --amber:#ffb000;--red:#ff3333;--text:#c8e6c8;--muted:#4a7a4a;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+}
+html,body{height:100%;overflow:hidden;font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,0.02) 2px,rgba(0,255,65,0.02) 4px);pointer-events:none;z-index:9999;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#041504,#050a05 80%);z-index:100;padding:20px;padding-top:calc(20px + var(--safe-top));}
+#login-screen::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,255,65,0.025) 39px,rgba(0,255,65,0.025) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,255,65,0.025) 39px,rgba(0,255,65,0.025) 40px);pointer-events:none;}
+.login-box{width:100%;max-width:380px;background:rgba(8,16,8,0.97);border:1px solid var(--border2);padding:32px 24px 28px;position:relative;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));}
+.cx{position:absolute;width:14px;height:14px;border-color:var(--green3);border-style:solid;}
+.cx.tl{top:0;left:0;border-width:2px 0 0 2px;}.cx.tr{top:0;right:0;border-width:2px 2px 0 0;}
+.cx.bl{bottom:0;left:0;border-width:0 0 2px 2px;}.cx.br{bottom:0;right:0;border-width:0 2px 2px 0;}
+.l-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.l-sys{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;}
+.l-live{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);}
+.blink{animation:blink 1s step-end infinite;}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.l-emblem{text-align:center;margin-bottom:18px;}
+.emblem-wrap{width:64px;height:64px;margin:0 auto 8px;position:relative;}
+.e-ring{position:absolute;inset:0;border:1px solid var(--green3);border-radius:50%;animation:spin 18s linear infinite;}
+.e-ring2{position:absolute;inset:5px;border:1px dashed var(--border2);border-radius:50%;animation:spin 9s linear infinite reverse;}
+.e-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.l-code{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);}
+.l-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--green);letter-spacing:2px;text-shadow:0 0 14px rgba(0,255,65,0.5);margin:6px 0 2px;text-align:center;}
+.l-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:center;}
+.l-field{margin-top:14px;}
+.l-field label{display:block;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green3);letter-spacing:2px;margin-bottom:5px;}
+.l-field input{width:100%;background:#040c04;border:1px solid var(--border2);border-left:3px solid var(--green3);padding:11px 13px;font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green);outline:none;-webkit-appearance:none;border-radius:0;}
+.l-field input:focus{border-color:var(--green);border-left-color:var(--green);}
+.l-field input::placeholder{color:var(--muted);opacity:0.4;}
+.btn-access{width:100%;margin-top:18px;background:transparent;border:1px solid var(--green);color:var(--green);padding:13px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));-webkit-appearance:none;border-radius:0;transition:all .2s;}
+.btn-access:hover,.btn-access:active{background:rgba(0,255,65,0.07);box-shadow:0 0 16px rgba(0,255,65,0.2);}
+.l-error{background:rgba(255,51,51,0.08);border:1px solid rgba(255,51,51,0.3);border-left:3px solid var(--red);padding:9px 12px;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:#ff9999;letter-spacing:1px;display:none;}
+
+/* APP */
+#app-screen{display:none;position:fixed;inset:0;flex-direction:column;background:var(--bg);}
+
+/* TOP BAR */
+.top-bar{background:var(--panel);border-bottom:1px solid var(--border2);padding:10px 14px;padding-top:calc(10px + var(--safe-top));display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.tb-avatar{width:38px;height:38px;flex-shrink:0;background:linear-gradient(135deg,#0d2a0d,#1a4a1a);border:1px solid var(--green3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.tb-info{flex:1;min-width:0;}
+.tb-name{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--green);letter-spacing:1px;}
+.tb-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:1px;}
+.tb-logout{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:6px 10px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;border-radius:3px;}
+.tb-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border2);flex-shrink:0;background:var(--panel);}
+.tab{flex:1;padding:10px 6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* CONTENT */
+.tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.tab-content::-webkit-scrollbar{display:none;}
+.tab-pane{display:none;padding:16px 14px;}
+.tab-pane.active{display:block;}
+
+/* SECCIÓN */
+.sec-title{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+.sec-title::before{content:'// ';color:var(--green3);}
+
+/* UPLOAD ZONE */
+.upload-zone{border:1px dashed var(--border2);background:#060e06;padding:20px;text-align:center;cursor:pointer;position:relative;transition:all .2s;margin-bottom:12px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green3);background:rgba(0,255,65,0.03);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.uz-ico{font-size:28px;margin-bottom:6px;}
+.uz-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;}
+.uz-txt strong{color:var(--green2);}
+
+/* FILE LOADED */
+.file-loaded{display:none;align-items:center;gap:10px;background:#060e06;border:1px solid rgba(0,255,65,0.2);border-left:3px solid var(--green);padding:10px 12px;margin-bottom:12px;}
+.file-loaded.show{display:flex;}
+.fl-ico{font-size:20px;}
+.fl-info{flex:1;min-width:0;}
+.fl-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fl-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
+.fl-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;}
+.fl-rm:hover{color:var(--red);}
+
+/* MES SELECT */
+.field-group{margin-bottom:14px;}
+.field-group label{display:block;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green3);letter-spacing:2px;margin-bottom:6px;}
+.field-group select,.field-group input[type=number]{width:100%;background:#060e06;border:1px solid var(--border2);border-left:3px solid var(--green3);padding:10px 12px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green);outline:none;-webkit-appearance:none;border-radius:0;cursor:pointer;}
+.field-group select option{background:#0a140a;color:var(--text);}
+
+/* BOTÓN PRINCIPAL */
+.btn-main{width:100%;background:transparent;border:1px solid var(--green);color:var(--green);padding:13px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));-webkit-appearance:none;border-radius:0;transition:all .2s;margin-top:4px;}
+.btn-main:hover,.btn-main:active{background:rgba(0,255,65,0.07);box-shadow:0 0 16px rgba(0,255,65,0.2);}
+.btn-main:disabled{opacity:0.3;cursor:not-allowed;}
+.btn-main.amber{border-color:var(--amber);color:var(--amber);}
+.btn-main.amber:hover{background:rgba(255,176,0,0.07);}
+
+/* PREVIEW TABLA */
+.preview-box{background:#060e06;border:1px solid var(--border);margin-top:14px;overflow-x:auto;display:none;}
+.preview-box.show{display:block;}
+.preview-title{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);letter-spacing:1px;}
+.preview-title::before{content:'// ';color:var(--green3);}
+.preview-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:10px;}
+th{background:#0a1a0a;color:var(--green3);padding:6px 8px;text-align:center;border:1px solid var(--border);white-space:nowrap;font-size:9px;letter-spacing:1px;}
+td{padding:5px 8px;border:1px solid var(--border);text-align:center;white-space:nowrap;}
+td.nombre{text-align:left;color:var(--text);min-width:120px;}
+td.puesto{text-align:left;color:var(--muted);font-size:9px;}
+td.N{color:#00ff41;font-weight:700;}
+td.S{color:#ffb000;font-weight:700;}
+td.D{color:#4a7a4a;}
+td.vacio{color:var(--border2);}
+tr:nth-child(even){background:rgba(0,255,65,0.01);}
+
+/* NOVEDADES FORM */
+.nov-form{display:flex;flex-direction:column;gap:12px;}
+.nov-field label{display:block;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green3);letter-spacing:2px;margin-bottom:5px;}
+.nov-field input,.nov-field select,.nov-field textarea{width:100%;background:#060e06;border:1px solid var(--border2);border-left:3px solid var(--green3);padding:10px 12px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;color:var(--text);outline:none;-webkit-appearance:none;border-radius:0;}
+.nov-field textarea{resize:none;height:70px;line-height:1.4;}
+.nov-field input::placeholder,.nov-field textarea::placeholder{color:var(--muted);}
+
+/* LISTA NOVEDADES */
+.nov-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+.nov-item{background:#060e06;border:1px solid var(--border);border-left:3px solid var(--amber);padding:10px 12px;}
+.nov-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.nov-fecha{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);}
+.nov-puesto{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green2);}
+.nov-body{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;}
+.nov-detail{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;}
+.nov-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;}
+.nov-rm:hover{color:var(--red);}
+
+/* ALERT */
+.alert{padding:10px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.5px;margin-top:10px;display:none;border-radius:0;}
+.alert.show{display:block;}
+.alert.ok{background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.2);border-left:3px solid var(--green);color:var(--green2);}
+.alert.err{background:rgba(255,51,51,0.06);border:1px solid rgba(255,51,51,0.2);border-left:3px solid var(--red);color:#ff9999;}
+.alert.info{background:rgba(255,176,0,0.06);border:1px solid rgba(255,176,0,0.2);border-left:3px solid var(--amber);color:var(--amber);}
+
+/* SPINNER */
+.spinner{display:none;text-align:center;padding:20px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green3);letter-spacing:2px;}
+.spinner.show{display:block;}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.spinner span{animation:pulse 1s infinite;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="cx tl"></div><div class="cx tr"></div><div class="cx bl"></div><div class="cx br"></div>
+    <div class="l-top">
+      <span class="l-sys">LEGION-OPS // v3.0</span>
+      <span class="l-live">● ONLINE <span class="blink">_</span></span>
+    </div>
+    <div class="l-emblem">
+      <div class="emblem-wrap">
+        <div class="e-ring"></div><div class="e-ring2"></div><div class="e-ico">🎯</div>
+      </div>
+      <div class="l-code">ACCESO RESTRINGIDO</div>
+      <div class="l-title">COMANDO MONTILLA</div>
+      <div class="l-sub">// SISTEMA DE PROGRAMACIÓN TÁCTICA //</div>
+    </div>
+    <div class="l-field"><label>▸ ID OPERATIVO</label><input type="text" id="lu" placeholder="usuario" autocomplete="username"/></div>
+    <div class="l-field"><label>▸ CÓDIGO DE ACCESO</label><input type="password" id="lp" placeholder="••••••••" autocomplete="current-password"/></div>
+    <button class="btn-access" onclick="doLogin()">◈ SOLICITAR ACCESO ◈</button>
+    <div class="l-error" id="l-err">⚠ ACCESO DENEGADO — CREDENCIALES INVÁLIDAS</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <div class="top-bar">
+    <div class="tb-avatar">💀</div>
+    <div class="tb-info">
+      <div class="tb-name">COMANDO MONTILLA</div>
+      <div class="tb-sub">SISTEMA DE PROGRAMACIÓN TÁCTICA</div>
+    </div>
+    <button class="tb-logout" onclick="doLogout()">[SALIR]</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('prog')">📊 PROGRAMACIÓN</div>
+    <div class="tab" onclick="switchTab('nov')">📋 NOVEDADES</div>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- TAB PROGRAMACIÓN -->
+    <div class="tab-pane active" id="tab-prog">
+      <div class="sec-title">CARGAR PROGRAMACIÓN BASE</div>
+
+      <div class="upload-zone" id="upload-zone" ondragover="ev.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+        <input type="file" accept=".xlsx,.xls" onchange="cargarExcel(event)" id="file-input"/>
+        <div class="uz-ico">📊</div>
+        <div class="uz-txt"><strong>SUBIR EXCEL DE JUNIO</strong><br/>Toca para seleccionar el archivo</div>
+      </div>
+
+      <div class="file-loaded" id="file-loaded">
+        <span class="fl-ico">📗</span>
+        <div class="fl-info">
+          <div class="fl-name" id="fl-name">archivo.xlsx</div>
+          <div class="fl-meta" id="fl-meta">CARGADO ✓</div>
+        </div>
+        <button class="fl-rm" onclick="quitarArchivo()">✕</button>
+      </div>
+
+      <div class="sec-title" style="margin-top:16px;">GENERAR PROGRAMACIÓN</div>
+
+      <div class="field-group">
+        <label>▸ MES A GENERAR</label>
+        <select id="mes-select">
+          <option value="7">JULIO 2026</option>
+          <option value="8">AGOSTO 2026</option>
+          <option value="9">SEPTIEMBRE 2026</option>
+          <option value="10">OCTUBRE 2026</option>
+          <option value="11">NOVIEMBRE 2026</option>
+          <option value="12">DICIEMBRE 2026</option>
+        </select>
+      </div>
+
+      <button class="btn-main" onclick="generarProgramacion()" id="btn-generar" disabled>⚡ GENERAR PROGRAMACIÓN</button>
+
+      <div class="alert" id="alert-prog"></div>
+      <div class="spinner" id="spinner-prog"><span>PROCESANDO DATOS TÁCTICOS...</span></div>
+
+      <div class="preview-box" id="preview-box">
+        <div class="preview-title">VISTA PREVIA — PRIMEROS PUESTOS</div>
+        <div class="preview-scroll">
+          <table id="preview-table"></table>
+        </div>
+      </div>
+
+      <button class="btn-main amber" onclick="descargarExcel()" id="btn-descargar" style="margin-top:14px;display:none;">⬇ DESCARGAR EXCEL JULIO</button>
+    </div>
+
+    <!-- TAB NOVEDADES -->
+    <div class="tab-pane" id="tab-nov">
+      <div class="sec-title">REGISTRAR NOVEDAD</div>
+
+      <div class="nov-form">
+        <div class="nov-field">
+          <label>▸ FECHA</label>
+          <input type="text" id="nov-fecha" placeholder="ej: 01 07 26"/>
+        </div>
+        <div class="nov-field">
+          <label>▸ PUESTO</label>
+          <input type="text" id="nov-puesto" placeholder="ej: SENDEROS SECTOR 2"/>
+        </div>
+        <div class="nov-field">
+          <label>▸ UNIDAD FALTANTE (Apellido)</label>
+          <input type="text" id="nov-falta-ap" placeholder="Apellido"/>
+        </div>
+        <div class="nov-field">
+          <label>▸ UNIDAD FALTANTE (Nombre)</label>
+          <input type="text" id="nov-falta-nom" placeholder="Nombre"/>
+        </div>
+        <div class="nov-field">
+          <label>▸ UNIDAD DE RELEVO (Apellido)</label>
+          <input type="text" id="nov-relev-ap" placeholder="Apellido o N-A"/>
+        </div>
+        <div class="nov-field">
+          <label>▸ UNIDAD DE RELEVO (Nombre)</label>
+          <input type="text" id="nov-relev-nom" placeholder="Nombre o N-A"/>
+        </div>
+        <div class="nov-field">
+          <label>▸ CAUSAL</label>
+          <input type="text" id="nov-causal" placeholder="ej: INCAPACIDAD, PERMISO, AUSENCIA..."/>
+        </div>
+        <div class="nov-field">
+          <label>▸ OBSERVACIONES</label>
+          <textarea id="nov-obs" placeholder="Detalles adicionales..."></textarea>
+        </div>
+        <button class="btn-main amber" onclick="agregarNovedad()">+ REGISTRAR NOVEDAD</button>
+      </div>
+
+      <div class="alert" id="alert-nov"></div>
+
+      <div style="margin-top:20px;">
+        <div class="sec-title">NOVEDADES REGISTRADAS</div>
+        <div class="nov-list" id="nov-list">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px;">SIN NOVEDADES REGISTRADAS</div>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="descargarNovedades()" id="btn-dl-nov" style="margin-top:14px;display:none;">⬇ DESCARGAR EXCEL NOVEDADES</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CREDENCIALES ──
+const CREDS={user:'montilla',pass:'legion2024'};
+
+// ── ESTADO ──
+let wbBase=null, wbBaseBytes=null, xlsName='';
+let vigilantesData=[];
+let novedades=[];
+let wbGenerado=null;
+
+// ── CICLOS ──
+// 3x3x3: NNN SSS DDD NNN SSS DDD...
+// 2x2x2: NN SS DD NN SS DD...
+const CICLO3=['N','N','N','S','S','S','D','D','D'];
+const CICLO2=['N','N','S','S','D','D'];
+
+// ── MESES ──
+const MESES_ES=['','ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+const DIAS_SEMANA=['D','L','M','M','J','V','S'];
+
+// ── LOGIN ──
+function doLogin(){
+  const u=document.getElementById('lu').value.trim().toLowerCase();
+  const p=document.getElementById('lp').value;
+  if(u===CREDS.user&&p===CREDS.pass){
+    document.getElementById('login-screen').style.display='none';
+    const app=document.getElementById('app-screen');
+    app.style.display='flex';
+    // Set fecha default hoy
+    const hoy=new Date();
+    document.getElementById('nov-fecha').value=`${String(hoy.getDate()).padStart(2,'0')} ${String(hoy.getMonth()+1).padStart(2,'0')} ${String(hoy.getFullYear()).slice(2)}`;
+  } else {
+    const e=document.getElementById('l-err');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',2800);
+  }
+}
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('lu').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lp').focus();});
+
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none';
+  document.getElementById('lu').value='';document.getElementById('lp').value='';
+  quitarArchivo();
+}
+
+// ── TABS ──
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['prog','nov'][i]===tab));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ── EXCEL ──
+function cargarExcel(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    try{
+      wbBaseBytes=ev.target.result;
+      wbBase=XLSX.read(new Uint8Array(wbBaseBytes),{type:'array',cellStyles:true});
+      xlsName=f.name;
+      document.getElementById('fl-name').textContent=f.name;
+      document.getElementById('fl-meta').textContent=`${(f.size/1024).toFixed(1)} KB · CARGADO ✓`;
+      document.getElementById('file-loaded').classList.add('show');
+      document.getElementById('upload-zone').style.display='none';
+      document.getElementById('btn-generar').disabled=false;
+      parsearVigilantes();
+      mostrarAlerta('alert-prog',`✓ ARCHIVO CARGADO — ${vigilantesData.length} VIGILANTES DETECTADOS`,'ok');
+    }catch(err){
+      mostrarAlerta('alert-prog','⚠ ERROR AL LEER EL ARCHIVO. VERIFICA QUE SEA UN EXCEL VÁLIDO.','err');
+    }
+  };
+  r.readAsArrayBuffer(f);
+  e.target.value='';
+}
+
+function quitarArchivo(){
+  wbBase=null;wbBaseBytes=null;xlsName='';vigilantesData=[];wbGenerado=null;
+  document.getElementById('file-loaded').classList.remove('show');
+  document.getElementById('file-input').value='';
+  document.getElementById('upload-zone').style.display='block';
+  document.getElementById('btn-generar').disabled=true;
+  document.getElementById('preview-box').classList.remove('show');
+  document.getElementById('btn-descargar').style.display='none';
+}
+
+// ── PARSEAR VIGILANTES ──
+function parsearVigilantes(){
+  vigilantesData=[];
+  const ws=wbBase.Sheets[wbBase.SheetNames[0]];
+  const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+  let currentPuesto='',currentLugar='';
+
+  data.forEach((row,ri)=>{
+    const r=row.map(c=>String(c||'').trim());
+
+    // Detectar encabezado de puesto (col A tiene APOLO o nombre de puesto)
+    if(r[0]&&r[0].length>2&&!r[0].match(/^[LMJVSD]$/)&&r[1]&&
+      (r[0].toUpperCase().includes('APOLO')||r[0].toUpperCase().includes('CASA')||r[0].toUpperCase().includes('SECTOR'))){
+      currentPuesto=r[0];
+      currentLugar=r[1];
+      return;
+    }
+
+    // Detectar fila de vigilante: col A vacía o es puesto, col B tiene nombre, turnos en col E+
+    const nombre=r[1];
+    if(!nombre||nombre.length<3)return;
+    if(/NOMBRE|APELLIDO|CELULAR|PROGRAMACION|SENDEROS/i.test(nombre))return;
+    if(!currentPuesto)return;
+
+    // Turnos desde columna E (índice 4) hasta col AH (índice ~34)
+    const turnos=[];
+    for(let i=4;i<=34;i++){
+      const v=r[i]||'';
+      if(['N','S','D'].includes(v.toUpperCase())) turnos.push(v.toUpperCase());
+      else turnos.push('');
+    }
+
+    if(turnos.filter(t=>t).length<5)return; // skip filas sin turnos reales
+
+    // Detectar ciclo
+    const patron=turnos.filter(t=>t).join('');
+    let ciclo=3;
+    // Si hay secuencias de 2: NS, ND, SN, SN etc sin triples
+    const tieneTriples=patron.match(/NNN|SSS|DDD/);
+    if(!tieneTriples&&patron.match(/NN|SS|DD/)){
+      // verificar si max consecutivos es 2
+      const maxConsec=maxConsecutivos(patron);
+      if(maxConsec<=2)ciclo=2;
+    }
+
+    // Último turno válido
+    let ultimoTurno='';
+    let ultimoIdx=-1;
+    for(let i=turnos.length-1;i>=0;i--){
+      if(turnos[i]){ultimoTurno=turnos[i];ultimoIdx=i;break;}
+    }
+
+    // Posición en el ciclo del último turno
+    const cicloArr=ciclo===3?CICLO3:CICLO2;
+    const posEnCiclo=calcularPosicionCiclo(turnos,cicloArr);
+
+    vigilantesData.push({
+      puesto:currentPuesto,
+      lugar:currentLugar,
+      nombre:nombre,
+      celular:r[2]||'',
+      ciclo:ciclo,
+      turnosJunio:turnos,
+      ultimoTurno:ultimoTurno,
+      posEnCiclo:posEnCiclo
+    });
+  });
+}
+
+function maxConsecutivos(s){
+  let max=1,curr=1;
+  for(let i=1;i<s.length;i++){
+    if(s[i]===s[i-1])curr++;
+    else curr=1;
+    if(curr>max)max=curr;
+  }
+  return max;
+}
+
+function calcularPosicionCiclo(turnos,cicloArr){
+  // Encontrar la posición en el ciclo del último turno usando los últimos N turnos válidos
+  const validos=turnos.filter(t=>t);
+  const n=cicloArr.length;
+  // Buscar la mejor coincidencia de los últimos n turnos con el ciclo
+  const ultimos=validos.slice(-n);
+  // Probar cada offset del ciclo
+  let mejorPos=0,mejorScore=-1;
+  for(let offset=0;offset<n;offset++){
+    let score=0;
+    for(let i=0;i<ultimos.length;i++){
+      if(ultimos[i]===cicloArr[(offset+i)%n])score++;
+    }
+    if(score>mejorScore){mejorScore=score;mejorPos=(offset+ultimos.length)%n;}
+  }
+  return mejorPos;
+}
+
+// ── GENERAR PROGRAMACIÓN ──
+function generarProgramacion(){
+  if(!wbBase||vigilantesData.length===0){
+    mostrarAlerta('alert-prog','⚠ CARGA UN ARCHIVO EXCEL PRIMERO.','err');return;
+  }
+
+  document.getElementById('spinner-prog').classList.add('show');
+  document.getElementById('btn-generar').disabled=true;
+
+  setTimeout(()=>{
+    try{
+      const mes=parseInt(document.getElementById('mes-select').value);
+      const anio=2026;
+      const diasEnMes=new Date(anio,mes,0).getDate();
+
+      // Generar turnos para cada vigilante
+      vigilantesData.forEach(v=>{
+        const cicloArr=v.ciclo===3?CICLO3:CICLO2;
+        const turnos=[];
+        let pos=v.posEnCiclo;
+        for(let d=0;d<diasEnMes;d++){
+          turnos.push(cicloArr[pos%cicloArr.length]);
+          pos++;
+        }
+        v.turnosNuevo=turnos;
+      });
+
+      // Construir Excel nuevo basado en el original
+      crearExcelNuevo(mes,anio,diasEnMes);
+
+      // Mostrar preview
+      mostrarPreview(mes,anio,diasEnMes);
+
+      document.getElementById('spinner-prog').classList.remove('show');
+      document.getElementById('btn-generar').disabled=false;
+      document.getElementById('btn-descargar').style.display='block';
+      mostrarAlerta('alert-prog',`✓ PROGRAMACIÓN DE ${MESES_ES[mes]} ${anio} GENERADA — ${vigilantesData.length} VIGILANTES`,'ok');
+    }catch(err){
+      document.getElementById('spinner-prog').classList.remove('show');
+      document.getElementById('btn-generar').disabled=false;
+      mostrarAlerta('alert-prog','⚠ ERROR AL GENERAR. INTENTA DE NUEVO.','err');
+      console.error(err);
+    }
+  },400);
+}
+
+function crearExcelNuevo(mes,anio,diasEnMes){
+  // Clonar el workbook original
+  wbGenerado=XLSX.read(new Uint8Array(wbBaseBytes),{type:'array',cellStyles:true});
+  const wsOrig=wbGenerado.Sheets[wbGenerado.SheetNames[0]];
+  const data=XLSX.utils.sheet_to_json(wsOrig,{header:1,defval:''});
+
+  // Nombre del mes en el encabezado
+  const mesNombre=MESES_ES[mes];
+
+  // Actualizar título del mes (buscar celda con JUNIO)
+  Object.keys(wsOrig).forEach(addr=>{
+    if(wsOrig[addr].v&&String(wsOrig[addr].v).toUpperCase().includes('JUNIO')){
+      wsOrig[addr].v=String(wsOrig[addr].v).replace(/JUNIO/gi,mesNombre);
+      wsOrig[addr].w=wsOrig[addr].v;
+    }
+  });
+
+  // Mapear vigilantes por nombre para actualizarlos
+  const vigMap={};
+  vigilantesData.forEach(v=>{ vigMap[v.nombre.toLowerCase()]=v; });
+
+  // Recorrer filas y actualizar turnos
+  let vigIdx=0; // índice del vigilante que estamos procesando
+  data.forEach((row,ri)=>{
+    const r=row.map(c=>String(c||'').trim());
+    const nombre=r[1];
+    if(!nombre||nombre.length<3)return;
+    if(/NOMBRE|APELLIDO|CELULAR|PROGRAMACION|SENDEROS/i.test(nombre))return;
+
+    const vg=vigMap[nombre.toLowerCase()];
+    if(!vg||!vg.turnosNuevo)return;
+
+    // Los turnos empiezan en columna E (índice 4 → col 5 en Excel = E)
+    // Limpiar turnos del mes anterior y poner los nuevos
+    for(let d=0;d<31;d++){
+      const colIdx=4+d; // 0-indexed
+      const colLetter=XLSX.utils.encode_col(colIdx);
+      const cellAddr=`${colLetter}${ri+1}`;
+      if(d<vg.turnosNuevo.length){
+        wsOrig[cellAddr]={t:'s',v:vg.turnosNuevo[d],w:vg.turnosNuevo[d]};
+      } else {
+        // Mes puede tener menos de 31 días
+        if(wsOrig[cellAddr]) wsOrig[cellAddr]={t:'s',v:'',w:''};
+      }
+    }
+  });
+
+  // Actualizar días de la semana en encabezados
+  // Buscar filas con L M M J V S D y actualizar
+  const primerDia=new Date(anio,mes-1,1).getDay(); // 0=Dom
+  data.forEach((row,ri)=>{
+    const r=row.map(c=>String(c||'').trim());
+    // Detectar fila de días (tiene L,M,M,J,V,S,D)
+    const diasCount=r.filter(c=>/^[LMJVSD]$/.test(c)).length;
+    if(diasCount>=5){
+      // Actualizar días
+      let diaActual=primerDia;
+      for(let d=0;d<31;d++){
+        const colIdx=4+d;
+        const colLetter=XLSX.utils.encode_col(colIdx);
+        const cellAddr=`${colLetter}${ri+1}`;
+        if(d<diasEnMes){
+          const diaSemana=DIAS_SEMANA[(primerDia+d)%7];
+          wsOrig[cellAddr]={t:'s',v:diaSemana,w:diaSemana};
+        }
+      }
+    }
+    // Actualizar números de días
+    const numCount=r.slice(4).filter(c=>/^\d+$/.test(c)&&parseInt(c)>=1&&parseInt(c)<=31).length;
+    if(numCount>=20){
+      for(let d=0;d<31;d++){
+        const colIdx=4+d;
+        const colLetter=XLSX.utils.encode_col(colIdx);
+        const cellAddr=`${colLetter}${ri+1}`;
+        if(d<diasEnMes){
+          wsOrig[cellAddr]={t:'n',v:d+1,w:String(d+1)};
+        } else {
+          if(wsOrig[cellAddr]) wsOrig[cellAddr]={t:'s',v:'',w:''};
+        }
+      }
+    }
+  });
+}
+
+function mostrarPreview(mes,anio,diasEnMes){
+  const table=document.getElementById('preview-table');
+  table.innerHTML='';
+
+  // Header
+  const thead=document.createElement('thead');
+  const trH=document.createElement('tr');
+  trH.innerHTML='<th>PUESTO</th><th>VIGILANTE</th>';
+  for(let d=1;d<=Math.min(diasEnMes,15);d++){
+    const th=document.createElement('th');
+    th.textContent=d;
+    trH.appendChild(th);
+  }
+  if(diasEnMes>15){
+    const th=document.createElement('th');th.textContent='...';trH.appendChild(th);
+  }
+  thead.appendChild(trH);
+  table.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+  const muestra=vigilantesData.slice(0,20);
+  muestra.forEach(v=>{
+    const tr=document.createElement('tr');
+    const tdP=document.createElement('td');tdP.className='puesto';tdP.textContent=v.puesto;
+    const tdN=document.createElement('td');tdN.className='nombre';tdN.textContent=v.nombre;
+    tr.appendChild(tdP);tr.appendChild(tdN);
+    v.turnosNuevo.slice(0,15).forEach(t=>{
+      const td=document.createElement('td');
+      td.className=t||'vacio';
+      td.textContent=t||'-';
+      tr.appendChild(td);
+    });
+    if(diasEnMes>15){
+      const td=document.createElement('td');td.textContent='...';tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  document.getElementById('preview-box').classList.add('show');
+  // Scroll suave
+  setTimeout(()=>document.getElementById('preview-box').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+function descargarExcel(){
+  if(!wbGenerado)return;
+  const mes=parseInt(document.getElementById('mes-select').value);
+  const nombre=`PROGRAMACION_${MESES_ES[mes]}_2026.xlsx`;
+  XLSX.writeFile(wbGenerado,nombre);
+}
+
+// ── NOVEDADES ──
+function agregarNovedad(){
+  const fecha=document.getElementById('nov-fecha').value.trim();
+  const puesto=document.getElementById('nov-puesto').value.trim();
+  const faltaAp=document.getElementById('nov-falta-ap').value.trim();
+  const faltaNom=document.getElementById('nov-falta-nom').value.trim();
+  const relevAp=document.getElementById('nov-relev-ap').value.trim()||'N-A';
+  const relevNom=document.getElementById('nov-relev-nom').value.trim()||'N-A';
+  const causal=document.getElementById('nov-causal').value.trim();
+  const obs=document.getElementById('nov-obs').value.trim();
+
+  if(!fecha||!puesto||!faltaAp||!causal){
+    mostrarAlerta('alert-nov','⚠ FECHA, PUESTO, APELLIDO FALTANTE Y CAUSAL SON OBLIGATORIOS.','err');return;
+  }
+
+  const nov={id:Date.now(),fecha,puesto,faltaAp,faltaNom,relevAp,relevNom,causal,obs};
+  novedades.push(nov);
+  renderNovedades();
+  limpiarFormNov();
+  mostrarAlerta('alert-nov','✓ NOVEDAD REGISTRADA CORRECTAMENTE.','ok');
+  document.getElementById('btn-dl-nov').style.display='block';
+}
+
+function renderNovedades(){
+  const list=document.getElementById('nov-list');
+  if(novedades.length===0){
+    list.innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px;">SIN NOVEDADES REGISTRADAS</div>';
+    return;
+  }
+  list.innerHTML='';
+  novedades.forEach(n=>{
+    const div=document.createElement('div');
+    div.className='nov-item';
+    div.innerHTML=`
+      <div class="nov-header">
+        <span class="nov-fecha">${n.fecha}</span>
+        <span class="nov-puesto">${n.puesto}</span>
+        <button class="nov-rm" onclick="eliminarNov(${n.id})">✕</button>
+      </div>
+      <div class="nov-body">FALTANTE: ${n.faltaAp} ${n.faltaNom}</div>
+      <div class="nov-detail">RELEVO: ${n.relevAp} ${n.relevNom} | CAUSAL: ${n.causal}${n.obs?' | '+n.obs:''}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function eliminarNov(id){
+  novedades=novedades.filter(n=>n.id!==id);
+  renderNovedades();
+  if(novedades.length===0)document.getElementById('btn-dl-nov').style.display='none';
+}
+
+function limpiarFormNov(){
+  ['nov-puesto','nov-falta-ap','nov-falta-nom','nov-relev-ap','nov-relev-nom','nov-causal','nov-obs'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+}
+
+function descargarNovedades(){
+  if(novedades.length===0)return;
+
+  // Clonar workbook base o crear uno nuevo
+  let wbNov;
+  if(wbBase){
+    wbNov=XLSX.read(new Uint8Array(wbBaseBytes),{type:'array',cellStyles:true});
+  } else {
+    wbNov=XLSX.utils.book_new();
+    const wsVacio=XLSX.utils.aoa_to_sheet([]);
+    XLSX.utils.book_append_sheet(wbNov,'PROGRAMACION','PROGRAMACION');
+  }
+
+  // Buscar o crear hoja de novedades
+  const novSheetName=wbNov.SheetNames.find(s=>s.toUpperCase().includes('NOVEDAD'))||wbNov.SheetNames[1];
+  let wsNov;
+  if(novSheetName){
+    wsNov=wbNov.Sheets[novSheetName];
+  } else {
+    wsNov=XLSX.utils.aoa_to_sheet([]);
+    XLSX.utils.book_append_sheet(wbNov,'REPORTE NOVEDADES',wsNov);
+  }
+
+  // Encontrar última fila con datos
+  const dataExist=XLSX.utils.sheet_to_json(wsNov,{header:1,defval:''});
+  let lastRow=dataExist.length;
+  // Agregar desde esa fila
+  novedades.forEach((n,i)=>{
+    const fila=lastRow+i+1;
+    const escribir=(col,val)=>{wsNov[`${col}${fila}`]={t:'s',v:String(val),w:String(val)};};
+    escribir('A',n.fecha);
+    escribir('B',n.puesto);
+    escribir('D',n.faltaAp);
+    escribir('E',n.faltaNom);
+    escribir('F',n.relevAp);
+    escribir('G',n.relevNom);
+    escribir('I',n.causal);
+    escribir('J',n.obs);
+  });
+  // Actualizar rango
+  const rango=XLSX.utils.decode_range(wsNov['!ref']||'A1:J1');
+  rango.e.r=Math.max(rango.e.r,lastRow+novedades.length);
+  wsNov['!ref']=XLSX.utils.encode_range(rango);
+
+  XLSX.writeFile(wbNov,'NOVEDADES_'+new Date().toLocaleDateString('es-CO').replace(/\//g,'-')+'.xlsx');
+}
+
+// ── UI UTILS ──
+function mostrarAlerta(id,msg,tipo){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.className='alert show '+tipo;
+  setTimeout(()=>el.classList.remove('show'),5000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="COMANDO MONTILLA">
+<meta name="theme-color" content="#050a05">
+<title>COMANDO MONTILLA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+:root{
+  --bg:#060d06;
+  --panel:#0a140a;
+  --panel2:#0d1a0d;
+  --border:#1a3a1a;
+  --border2:#1e3a1e;
+  --green:#00ff41;
+  --green2:#00c832;
+  --green3:#007a1f;
+  --dim:#1a4a1a;
+  --amber:#ffb000;
+  --red:#ff3333;
+  --text:#c8e6c8;
+  --muted:#4a7a4a;
+  --scan:rgba(0,255,65,0.025);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+html,body{
+  height:100%;
+  overflow:hidden;
+  font-family:'Rajdhani',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* scanlines */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scan) 2px,var(--scan) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ══════════════════
+   LOGIN
+══════════════════ */
+#login-screen{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 40%,#041504,#050a05 80%);
+  z-index:100;
+  padding:20px;
+  padding-top:calc(20px + var(--safe-top));
+}
+
+/* grid bg */
+#login-screen::before{
+  content:'';position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,255,65,0.03) 39px,rgba(0,255,65,0.03) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,255,65,0.03) 39px,rgba(0,255,65,0.03) 40px);
+  pointer-events:none;
+}
+
+.login-box{
+  width:100%;max-width:380px;
+  background:rgba(8,16,8,0.97);
+  border:1px solid var(--border2);
+  padding:32px 24px 28px;
+  position:relative;
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+}
+
+/* corner deco */
+.cx{position:absolute;width:14px;height:14px;border-color:var(--green3);border-style:solid;}
+.cx.tl{top:0;left:0;border-width:2px 0 0 2px;}
+.cx.tr{top:0;right:0;border-width:2px 2px 0 0;}
+.cx.bl{bottom:0;left:0;border-width:0 0 2px 2px;}
+.cx.br{bottom:0;right:0;border-width:0 2px 2px 0;}
+
+.l-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.l-sys{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;}
+.l-live{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);display:flex;align-items:center;gap:5px;}
+.blink{animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.l-emblem{text-align:center;margin-bottom:20px;position:relative;}
+.emblem-wrap{width:72px;height:72px;margin:0 auto 10px;position:relative;}
+.e-ring{position:absolute;inset:0;border:1px solid var(--green3);border-radius:50%;animation:spin 18s linear infinite;}
+.e-ring2{position:absolute;inset:5px;border:1px dashed var(--dim);border-radius:50%;animation:spin 9s linear infinite reverse;}
+.e-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.l-code{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);}
+.l-title{
+  font-family:'Orbitron',monospace;font-size:18px;font-weight:900;
+  color:var(--green);letter-spacing:2px;
+  text-shadow:0 0 16px rgba(0,255,65,0.5);
+  margin:6px 0 2px;text-align:center;
+}
+.l-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:center;}
+
+.l-field{margin-top:16px;}
+.l-field label{
+  display:block;font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--green3);letter-spacing:2px;margin-bottom:5px;
+}
+.l-field input{
+  width:100%;background:#040c04;
+  border:1px solid var(--border2);border-left:3px solid var(--green3);
+  padding:11px 13px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green);
+  outline:none;transition:all 0.2s;
+  -webkit-appearance:none;border-radius:0;
+}
+.l-field input:focus{border-color:var(--green);border-left-color:var(--green);box-shadow:0 0 10px rgba(0,255,65,0.1);}
+.l-field input::placeholder{color:var(--muted);opacity:0.4;}
+
+.btn-access{
+  width:100%;margin-top:20px;
+  background:transparent;border:1px solid var(--green);color:var(--green);
+  padding:13px;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;
+  cursor:pointer;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  transition:all 0.2s;-webkit-appearance:none;border-radius:0;
+}
+.btn-access:hover,.btn-access:active{background:rgba(0,255,65,0.07);box-shadow:0 0 16px rgba(0,255,65,0.2);}
+
+.l-error{
+  background:rgba(255,51,51,0.08);border:1px solid rgba(255,51,51,0.3);border-left:3px solid var(--red);
+  padding:9px 12px;margin-top:10px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:#ff9999;letter-spacing:1px;
+  display:none;
+}
+
+.l-footer{
+  display:flex;justify-content:space-between;margin-top:18px;
+  font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.5px;
+}
+
+/* ══════════════════
+   APP — MOBILE CHAT
+══════════════════ */
+#app-screen{
+  display:none;
+  position:fixed;inset:0;
+  flex-direction:column;
+  background:var(--bg);
+}
+
+/* ── TOP BAR (tipo WhatsApp) ── */
+.top-bar{
+  background:var(--panel);
+  border-bottom:1px solid var(--border2);
+  padding:10px 14px;
+  padding-top:calc(10px + var(--safe-top));
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+  position:relative;z-index:10;
+}
+
+.tb-avatar{
+  width:40px;height:40px;flex-shrink:0;
+  background:linear-gradient(135deg,#0d2a0d,#1a4a1a);
+  border:1px solid var(--green3);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+
+.tb-info{flex:1;min-width:0;}
+.tb-name{
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
+  color:var(--green);letter-spacing:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tb-status{
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green2);
+  display:flex;align-items:center;gap:5px;margin-top:1px;
+}
+.tb-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);}
+
+.tb-actions{display:flex;gap:6px;flex-shrink:0;}
+
+.tb-btn{
+  width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;transition:all 0.15s;
+  border-radius:4px;
+  position:relative;
+}
+.tb-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.tb-btn:hover,.tb-btn:active{border-color:var(--green3);background:rgba(0,255,65,0.06);}
+
+/* badge archivo */
+.file-badge{
+  position:absolute;top:-4px;right:-4px;
+  width:10px;height:10px;
+  background:var(--green);border-radius:50%;
+  display:none;
+}
+.file-badge.show{display:block;}
+
+/* ── MENSAJES ── */
+.chat-body{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:12px 10px;
+  display:flex;flex-direction:column;gap:8px;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+}
+
+.chat-body::-webkit-scrollbar{display:none;}
+
+/* fondo tipo WhatsApp */
+.chat-body{
+  background:
+    var(--bg)
+    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2300ff41' fill-opacity='0.018'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Day separator */
+.day-sep{
+  text-align:center;margin:6px 0;
+}
+.day-sep span{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--muted);background:rgba(0,255,65,0.05);
+  border:1px solid var(--border);
+  padding:3px 10px;letter-spacing:1px;
+}
+
+/* Welcome bubble */
+.welcome-bubble{
+  background:rgba(0,255,65,0.04);
+  border:1px solid var(--border2);
+  border-left:3px solid var(--green3);
+  padding:14px 16px;
+  margin:20px auto;max-width:300px;text-align:center;
+}
+.wb-skull{font-size:36px;margin-bottom:8px;}
+.wb-title{
+  font-family:'Orbitron',monospace;font-size:12px;color:var(--green);
+  letter-spacing:2px;margin-bottom:6px;
+}
+.wb-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;letter-spacing:0.3px;}
+
+/* Mensajes */
+.msg-row{display:flex;flex-direction:column;max-width:82%;word-break:break-word;}
+.msg-row.from-me{align-self:flex-end;align-items:flex-end;}
+.msg-row.from-ai{align-self:flex-start;align-items:flex-start;}
+
+.bubble{
+  padding:9px 12px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;font-weight:500;
+  line-height:1.5;
+  position:relative;
+}
+
+/* Burbuja IA — izquierda (verde oscuro) */
+.from-ai .bubble{
+  background:#0d1f0d;
+  border:1px solid var(--border2);
+  border-left:3px solid var(--green3);
+  border-radius:0 12px 12px 12px;
+  color:var(--text);
+}
+
+/* Burbuja usuario — derecha (ámbar oscuro) */
+.from-me .bubble{
+  background:#1a1500;
+  border:1px solid rgba(255,176,0,0.2);
+  border-right:3px solid var(--amber);
+  border-radius:12px 0 12px 12px;
+  color:#ffe0a0;
+}
+
+.msg-time{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--muted);
+  margin-top:3px;padding:0 4px;
+}
+
+/* Check marks estilo WhatsApp */
+.msg-check{color:var(--green3);font-size:10px;margin-left:4px;}
+
+/* Imagen en burbuja */
+.bubble-img{
+  max-width:200px;max-height:200px;
+  border:1px solid var(--border2);
+  border-radius:6px;
+  margin-bottom:6px;display:block;
+}
+
+/* Change pills */
+.change-list{margin-top:8px;display:flex;flex-direction:column;gap:3px;}
+.change-pill{
+  background:rgba(0,255,65,0.06);
+  border:1px solid rgba(0,255,65,0.15);
+  border-left:2px solid var(--green);
+  padding:4px 8px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green2);
+  letter-spacing:0.3px;
+}
+
+/* Typing */
+.typing-wrap{display:flex;align-items:center;gap:8px;padding:6px 0;}
+.typing-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+.dots{display:flex;gap:4px;}
+.dots span{
+  width:6px;height:6px;background:var(--green3);border-radius:50%;
+  animation:dot 1.2s infinite;
+}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* ── PANEL ARCHIVO (drawer desde arriba) ── */
+.file-drawer{
+  background:var(--panel);
+  border-bottom:1px solid var(--border2);
+  overflow:hidden;
+  max-height:0;
+  transition:max-height 0.3s ease;
+  flex-shrink:0;
+}
+.file-drawer.open{max-height:200px;}
+
+.fd-inner{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.fd-title{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+
+.upload-zone{
+  border:1px dashed var(--border2);background:#060e06;
+  padding:14px;text-align:center;cursor:pointer;
+  position:relative;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green3);background:rgba(0,255,65,0.03);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.uz-ico{font-size:20px;}
+.uz-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.5px;text-align:left;line-height:1.5;}
+.uz-txt strong{color:var(--green2);}
+
+.file-loaded{
+  display:none;align-items:center;gap:10px;
+  background:#060e06;border:1px solid rgba(0,255,65,0.2);border-left:3px solid var(--green);
+  padding:10px 12px;
+}
+.file-loaded.show{display:flex;}
+.fl-icon{font-size:20px;flex-shrink:0;}
+.fl-info{flex:1;min-width:0;}
+.fl-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fl-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
+.fl-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px;}
+.fl-rm:hover{color:var(--red);}
+
+/* ── BARRA INPUT (fija abajo) ── */
+.input-bar{
+  background:var(--panel);
+  border-top:1px solid var(--border2);
+  padding:8px 10px;
+  padding-bottom:calc(8px + var(--safe-bottom));
+  flex-shrink:0;
+}
+
+.img-preview-bar{
+  display:none;align-items:center;gap:8px;
+  background:#060e06;border:1px solid var(--border);border-left:3px solid var(--amber);
+  padding:7px 10px;margin-bottom:8px;
+}
+.img-preview-bar.show{display:flex;}
+.ipb-thumb{width:38px;height:38px;object-fit:cover;border:1px solid var(--border2);}
+.ipb-name{flex:1;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ipb-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;}
+
+.input-row{display:flex;gap:7px;align-items:flex-end;}
+
+.ib-icon{
+  width:40px;height:40px;flex-shrink:0;
+  background:#060e06;border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;transition:all 0.15s;
+  position:relative;border-radius:4px;
+}
+.ib-icon input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.ib-icon:hover,.ib-icon:active{border-color:var(--green3);}
+
+textarea#chat-input{
+  flex:1;
+  background:#060e06;
+  border:1px solid var(--border2);border-left:3px solid var(--green3);
+  padding:10px 12px;
+  font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;
+  color:var(--text);
+  outline:none;resize:none;
+  min-height:40px;max-height:100px;
+  line-height:1.4;
+  -webkit-appearance:none;border-radius:0;
+  transition:border-color 0.2s;
+}
+textarea#chat-input:focus{border-left-color:var(--green);}
+textarea#chat-input::placeholder{color:var(--muted);}
+
+.btn-send{
+  width:40px;height:40px;flex-shrink:0;
+  background:transparent;border:1px solid var(--green);color:var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;
+  border-radius:4px;transition:all 0.15s;
+}
+.btn-send:hover,.btn-send:active{background:rgba(0,255,65,0.08);}
+.btn-send:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* ── DOWNLOAD TOAST ── */
+.dl-toast{
+  position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%);
+  background:var(--panel);border:1px solid var(--green);
+  padding:10px 18px;
+  display:none;align-items:center;gap:10px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);
+  letter-spacing:1px;white-space:nowrap;z-index:200;
+  box-shadow:0 0 20px rgba(0,255,65,0.2);
+  animation:fadeIn 0.3s ease;
+}
+.dl-toast.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+.dl-toast button{
+  background:transparent;border:1px solid var(--green);color:var(--green);
+  padding:4px 10px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;
+  cursor:pointer;
+}
+
+/* ── QUICK CMDS (chips horizontales) ── */
+.quick-chips{
+  display:flex;gap:6px;
+  overflow-x:auto;padding:8px 10px 0;
+  flex-shrink:0;
+  -webkit-overflow-scrolling:touch;
+}
+.quick-chips::-webkit-scrollbar{display:none;}
+
+.chip{
+  background:#060e06;border:1px solid var(--border2);border-left:2px solid var(--green3);
+  padding:6px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:0.5px;white-space:nowrap;cursor:pointer;
+  transition:all 0.15s;flex-shrink:0;
+}
+.chip:hover,.chip:active{border-color:var(--green);color:var(--green2);background:rgba(0,255,65,0.05);}
+
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="cx tl"></div><div class="cx tr"></div>
+    <div class="cx bl"></div><div class="cx br"></div>
+
+    <div class="l-top">
+      <span class="l-sys">LEGION-OPS // v2.4</span>
+      <span class="l-live">● ONLINE <span class="blink">_</span></span>
+    </div>
+
+    <div class="l-emblem">
+      <div class="emblem-wrap">
+        <div class="e-ring"></div><div class="e-ring2"></div>
+        <div class="e-ico">🎯</div>
+      </div>
+      <div class="l-code">ACCESO RESTRINGIDO</div>
+      <div class="l-title">COMANDO MONTILLA</div>
+      <div class="l-sub">// SISTEMA TÁCTICO DE PROGRAMACIÓN //</div>
+    </div>
+
+    <div class="l-field">
+      <label>▸ ID OPERATIVO</label>
+      <input type="text" id="login-user" placeholder="usuario" autocomplete="username"/>
+    </div>
+    <div class="l-field">
+      <label>▸ CÓDIGO DE ACCESO</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+
+    <button class="btn-access" onclick="doLogin()">◈ SOLICITAR ACCESO ◈</button>
+    <div class="l-error" id="l-error">⚠ ACCESO DENEGADO — CREDENCIALES INVÁLIDAS</div>
+
+    <div class="l-footer">
+      <span>LEGION STUDIO</span>
+      <span>AES-256</span>
+      <span>2024</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app-screen">
+
+  <!-- Top bar tipo WhatsApp -->
+  <div class="top-bar">
+    <div class="tb-avatar">💀</div>
+    <div class="tb-info">
+      <div class="tb-name">COMANDO MONTILLA</div>
+      <div class="tb-status">
+        <div class="tb-dot"></div>
+        <span id="tb-status-txt">EN SERVICIO</span>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <!-- Botón archivo -->
+      <div class="tb-btn" onclick="toggleDrawer()" title="Programación">
+        📊
+        <div class="file-badge" id="file-badge"></div>
+      </div>
+      <!-- Botón salir -->
+      <div class="tb-btn" onclick="doLogout()" title="Salir">🔒</div>
+    </div>
+  </div>
+
+  <!-- Drawer archivo -->
+  <div class="file-drawer" id="file-drawer">
+    <div class="fd-inner">
+      <div class="fd-title">// PROGRAMACIÓN MENSUAL</div>
+
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" accept=".xlsx,.xls" onchange="handleFile(event)" id="file-input"/>
+        <div class="uz-ico">📊</div>
+        <div class="uz-txt"><strong>SUBIR EXCEL</strong><br/>Toca para seleccionar</div>
+      </div>
+
+      <div class="file-loaded" id="file-loaded">
+        <span class="fl-icon">📗</span>
+        <div class="fl-info">
+          <div class="fl-name" id="fl-name">archivo.xlsx</div>
+          <div class="fl-meta" id="fl-meta">CARGADO ✓</div>
+        </div>
+        <button class="fl-rm" onclick="removeFile()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick chips -->
+  <div class="quick-chips" id="quick-chips">
+    <div class="chip" onclick="qCmd('Dame un informe de la programación actual')">📋 Informe</div>
+    <div class="chip" onclick="qCmd('¿Qué puestos tienen vigilante asignado?')">📍 Puestos</div>
+    <div class="chip" onclick="qCmd('¿Vigilantes sin puesto este mes?')">👤 Sin puesto</div>
+    <div class="chip" onclick="qCmd('¿Hay puestos sin cubrir?')">⚠️ Vacíos</div>
+    <div class="chip" onclick="qCmd('Necesito reasignar un vigilante')">✏️ Reasignar</div>
+    <div class="chip" onclick="qCmd('¿Cuántos adicionales hay este mes?')">➕ Adicionales</div>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="chat-body" id="chat-body">
+    <div class="day-sep"><span>HOY // INICIO DE SESIÓN</span></div>
+    <div class="welcome-bubble">
+      <div class="wb-skull">💀</div>
+      <div class="wb-title">SISTEMA ACTIVO</div>
+      <div class="wb-sub">
+        TOCA 📊 ARRIBA PARA CARGAR<br/>LA PROGRAMACIÓN DEL MES.<br/><br/>
+        ESCRÍBEME O MANDA UNA FOTO<br/>CON LO QUE HAY QUE AJUSTAR.
+      </div>
+    </div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="input-bar">
+    <div class="img-preview-bar" id="img-preview-bar">
+      <img class="ipb-thumb" id="ipb-thumb" src="" alt=""/>
+      <span class="ipb-name" id="ipb-name">imagen.jpg</span>
+      <button class="ipb-rm" onclick="clearImg()">✕</button>
+    </div>
+    <div class="input-row">
+      <div class="ib-icon" title="Imagen">
+        📷
+        <input type="file" accept="image/*" onchange="handleImg(event)" id="img-input"/>
+      </div>
+      <textarea id="chat-input" placeholder="Dame tus órdenes, Comando..." rows="1"
+        onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+      <button class="btn-send" id="btn-send" onclick="send()">▶</button>
+    </div>
+  </div>
+
+  <!-- Download toast -->
+  <div class="dl-toast" id="dl-toast">
+    ⬇ EXCEL LISTO
+    <button onclick="downloadExcel()">DESCARGAR</button>
+  </div>
+
+</div>
+
+<script>
+// ── CREDENCIALES ──
+const CREDS={user:'montilla',pass:'legion2024'};
+
+// ── ESTADO ──
+let wb=null, modWB=null, xlsName='';
+let pendImg=null, pendImgName='';
+let history=[];
+let busy=false;
+let drawerOpen=false;
+
+// ── LOGIN ──
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim().toLowerCase();
+  const p=document.getElementById('login-pass').value;
+  if(u===CREDS.user&&p===CREDS.pass){
+    document.getElementById('login-screen').style.display='none';
+    const app=document.getElementById('app-screen');
+    app.style.display='flex';
+    const h=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    aiMsg(`🎯 ACCESO CONCEDIDO — ${h}hrs\n\n¡Qué más, Comando Montilla! ¿Cómo va el turno? Estoy listo para recibir órdenes.\n\nToca el 📊 arriba para cargar la programación del mes y dime qué hay que ajustar. Puedes escribirme o mandarme una foto con lo señalado.`,[]);
+  } else {
+    const e=document.getElementById('l-error');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',2800);
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-pass').focus();});
+
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  removeFile();
+  document.getElementById('chat-body').innerHTML='<div class="day-sep"><span>HOY // INICIO DE SESIÓN</span></div><div class="welcome-bubble"><div class="wb-skull">💀</div><div class="wb-title">SISTEMA ACTIVO</div><div class="wb-sub">TOCA 📊 ARRIBA PARA CARGAR<br/>LA PROGRAMACIÓN DEL MES.<br/><br/>ESCRÍBEME O MANDA UNA FOTO<br/>CON LO QUE HAY QUE AJUSTAR.</div></div>';
+  history=[];
+}
+
+// ── DRAWER ──
+function toggleDrawer(){
+  drawerOpen=!drawerOpen;
+  document.getElementById('file-drawer').classList.toggle('open',drawerOpen);
+}
+
+// ── ARCHIVO EXCEL ──
+function handleFile(e){
+  const f=e.target.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    try{
+      const data=new Uint8Array(ev.target.result);
+      wb=XLSX.read(data,{type:'array',cellStyles:true});
+      modWB=XLSX.read(data,{type:'array',cellStyles:true});
+      xlsName=f.name;
+      document.getElementById('fl-name').textContent=f.name;
+      document.getElementById('fl-meta').textContent=`${(f.size/1024).toFixed(1)} KB · CARGADO ✓`;
+      document.getElementById('upload-zone').style.display='none';
+      document.getElementById('file-loaded').classList.add('show');
+      document.getElementById('file-badge').classList.add('show');
+      document.getElementById('tb-status-txt').textContent='PROGRAMACIÓN CARGADA';
+      // cerrar drawer
+      setTimeout(()=>{drawerOpen=false;document.getElementById('file-drawer').classList.remove('open');},400);
+      const sum=xlsSummary(wb);
+      aiMsg(`📊 ARCHIVO RECIBIDO: ${f.name}\n\n${sum}\nProgramación en sistema, Comando. Dame las órdenes.`,[]);
+    } catch(err){
+      aiMsg('⚠ ERROR — No pude leer ese archivo. Verifica que sea Excel (.xlsx / .xls).',[]);
+    }
+  };
+  r.readAsArrayBuffer(f);
+  e.target.value='';
+}
+
+function xlsSummary(w){
+  let s=`HOJAS: ${w.SheetNames.join(' | ')}\n`;
+  w.SheetNames.forEach(n=>{
+    const ws=w.Sheets[n];
+    if(ws['!ref']){const r=XLSX.utils.decode_range(ws['!ref']);s+=`▸ ${n}: ${r.e.r+1} filas\n`;}
+  });
+  return s;
+}
+
+function removeFile(){
+  wb=null;modWB=null;xlsName='';
+  document.getElementById('file-loaded').classList.remove('show');
+  document.getElementById('upload-zone').style.display='flex';
+  document.getElementById('file-input').value='';
+  document.getElementById('file-badge').classList.remove('show');
+  document.getElementById('tb-status-txt').textContent='EN SERVICIO';
+  document.getElementById('dl-toast').classList.remove('show');
+}
+
+// ── IMAGEN ──
+function handleImg(e){
+  const f=e.target.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    pendImg=ev.target.result.split(',')[1];
+    pendImgName=f.name;
+    document.getElementById('ipb-thumb').src=ev.target.result;
+    document.getElementById('ipb-name').textContent=f.name;
+    document.getElementById('img-preview-bar').classList.add('show');
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
+function clearImg(){
+  pendImg=null;pendImgName='';
+  document.getElementById('img-preview-bar').classList.remove('show');
+  document.getElementById('img-input').value='';
+}
+
+// ── CHAT ──
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function qCmd(t){document.getElementById('chat-input').value=t;resize(document.getElementById('chat-input'));send();}
+
+async function send(){
+  if(busy) return;
+  const inp=document.getElementById('chat-input');
+  const txt=inp.value.trim();
+  if(!txt&&!pendImg) return;
+  const uTxt=txt||'(imagen adjunta)';
+  const img=pendImg;
+  inp.value='';resize(inp);
+  userMsg(uTxt,img?`data:image/jpeg;base64,${img}`:null);
+  clearImg();
+
+  // Contexto excel
+  let xlsCtx='';
+  if(wb) xlsCtx=buildCtx(wb);
+
+  const sys=`Eres el asistente táctico personal del Supervisor Montilla — un operativo de seguridad experimentado, fornido, estilo escolta de élite al que llaman "Comando Montilla". Tu tono es militar, directo, con camaradería táctica entre colegas de confianza.
+
+PERSONALIDAD:
+- Llámalo "Comando Montilla", "Supervisor" o "Comando" según el contexto
+- Usa jerga táctica natural: "copiado", "recibido", "ejecutando", "en posición", "misión cumplida"
+- Sé eficiente y directo — sin rodeos
+- Muestra respeto por su experiencia en seguridad
+- Ocasionalmente puedes hacer referencia al trabajo de campo
+
+TU MISIÓN:
+1. Analizar programación mensual de vigilantes
+2. Interpretar órdenes de cambio (texto o imagen con marcas)
+3. Confirmar cambios con claridad
+4. Generar JSON de modificaciones cuando hay cambios concretos
+
+PARA CAMBIOS CONCRETOS incluye al final:
+<CAMBIOS_JSON>
+[{"hoja":"Hoja1","celda":"B5","valor_nuevo":"JUAN PEREZ","descripcion":"Reasignación vigilante puesto norte día 5"}]
+</CAMBIOS_JSON>
+
+Sin cambios concretos todavía → NO incluyas el bloque JSON.
+Responde siempre en español. Respuestas concisas — esto es un chat móvil.
+
+${xlsCtx?`\nPROGRAMACIÓN EN SISTEMA:\n${xlsCtx}`:'\nSin programación cargada aún.'}`;
+
+  // Construir partes del mensaje para Gemini
+  const parts=[];
+  if(img) parts.push({inlineData:{mimeType:'image/jpeg',data:img}});
+  parts.push({text: sys + '\n\nUSUARIO: ' + uTxt});
+
+  // Historial para Gemini
+  const geminiHistory=[];
+  for(let i=0;i<history.length-1;i+=2){
+    if(history[i]&&history[i+1]){
+      geminiHistory.push({role:'user',parts:[{text:history[i].content}]});
+      geminiHistory.push({role:'model',parts:[{text:history[i+1].content}]});
+    }
+  }
+
+  const PROXY_URL='https://script.google.com/macros/s/AKfycbyjAhW_SmmtGGs5a8UsRH8cG2yoQvUOqotMJqpdD69Pxk88LJ05gkff1DqDjmGzcefe/exec';
+  
+
+  const tid=showTyping();
+  busy=true;
+  document.getElementById('btn-send').disabled=true;
+
+  try{
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[
+          ...geminiHistory,
+          {role:'user',parts:parts}
+        ],
+        generationConfig:{maxOutputTokens:1000,temperature:0.7}
+      })
+    });
+    const d=await res.json();
+    removeTyping(tid);
+    const full=d?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(full){
+      const jm=full.match(/<CAMBIOS_JSON>([\s\S]*?)<\/CAMBIOS_JSON>/);
+      const display=full.replace(/<CAMBIOS_JSON>[\s\S]*?<\/CAMBIOS_JSON>/g,'').trim();
+      let cambios=[];
+      if(jm){try{cambios=JSON.parse(jm[1].trim());}catch(e){cambios=[];}}
+      history.push({role:'user',content:uTxt});
+      history.push({role:'assistant',content:full});
+      if(cambios.length>0&&modWB){applyChanges(cambios);showDlToast();}
+      aiMsg(display,cambios);
+    } else {
+      aiMsg('⚠ Error de transmisión. Reintenta, Comando.',[]);
+    }
+  } catch(err){
+    removeTyping(tid);
+    aiMsg('⚠ Sin conexión. Verifica la red, Comando.',[]);
+  }
+  busy=false;
+  document.getElementById('btn-send').disabled=false;
+}
+
+function buildCtx(w){
+  let c='';
+  w.SheetNames.forEach(n=>{
+    const ws=w.Sheets[n];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''}).slice(0,35);
+    c+=`\n=== ${n} ===\n`;
+    rows.forEach((r,i)=>{const s=r.map(x=>String(x).substring(0,28)).join('|');if(s.trim())c+=`F${i+1}:${s}\n`;});
+  });
+  return c;
+}
+
+function applyChanges(cs){
+  if(!modWB) return;
+  cs.forEach(c=>{
+    const ws=modWB.Sheets[c.hoja]||modWB.Sheets[modWB.SheetNames[0]];
+    if(ws&&c.celda) ws[c.celda]={t:'s',v:c.valor_nuevo,w:c.valor_nuevo};
+  });
+}
+
+function showDlToast(){document.getElementById('dl-toast').classList.add('show');}
+
+function downloadExcel(){
+  if(!modWB) return;
+  XLSX.writeFile(modWB,xlsName.replace(/\.(xlsx|xls)$/,'')+'_ACTUALIZADO.xlsx');
+}
+
+// ── UI ──
+function now(){return new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});}
+
+function userMsg(txt,imgSrc){
+  const body=document.getElementById('chat-body');
+  const d=document.createElement('div');
+  d.className='msg-row from-me';
+  d.innerHTML=`
+    <div class="bubble">
+      ${imgSrc?`<img src="${imgSrc}" class="bubble-img" alt=""/>`:''} 
+      ${txt!=='(imagen adjunta)'?fmt(txt):''}
+    </div>
+    <div class="msg-time">${now()} <span class="msg-check">✓✓</span></div>`;
+  body.appendChild(d);scroll();
+}
+
+function aiMsg(txt,cambios){
+  const body=document.getElementById('chat-body');
+  let ch='';
+  if(cambios&&cambios.length>0){
+    ch='<div class="change-list">';
+    cambios.forEach(c=>{ch+=`<div class="change-pill">▸ ${c.descripcion||`${c.celda} → ${c.valor_nuevo}`}</div>`;});
+    ch+='</div>';
+  }
+  const d=document.createElement('div');
+  d.className='msg-row from-ai';
+  d.innerHTML=`
+    <div class="bubble">${fmt(txt)}${ch}</div>
+    <div class="msg-time">${now()}</div>`;
+  body.appendChild(d);scroll();
+}
+
+function showTyping(){
+  const body=document.getElementById('chat-body');
+  const id='typ-'+Date.now();
+  const d=document.createElement('div');
+  d.className='msg-row from-ai';d.id=id;
+  d.innerHTML=`<div class="bubble"><div class="typing-wrap"><div class="typing-label">PROCESANDO</div><div class="dots"><span></span><span></span><span></span></div></div></div>`;
+  body.appendChild(d);scroll();return id;
+}
+function removeTyping(id){const e=document.getElementById(id);if(e)e.remove();}
+
+function fmt(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');}
+function scroll(){const b=document.getElementById('chat-body');b.scrollTop=b.scrollHeight;}
+</script>
+</body>
+</html>

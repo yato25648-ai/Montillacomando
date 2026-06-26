@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="COMANDO MONTILLA">
+<title>COMANDO MONTILLA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@600;700;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+:root{
+  --bg:#0d0d0d;
+  --bg2:#111111;
+  --panel:#181818;
+  --panel2:#1e1e1e;
+  --border:#2a2a2a;
+  --border2:#333333;
+  --green:#00e676;
+  --green2:#00c853;
+  --green3:#1b5e20;
+  --green-dim:#002a00;
+  --amber:#ffab00;
+  --amber2:#ff8f00;
+  --red:#ff1744;
+  --blue:#448aff;
+  --text:#e0e0e0;
+  --text2:#9e9e9e;
+  --muted:#616161;
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+}
+
+html,body{height:100%;font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* ── SCANLINES sutil ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.008) 3px,rgba(255,255,255,0.008) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ═══════════════════════════
+   LOGIN
+═══════════════════════════ */
+#login{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  background:#0d0d0d;
+  padding:24px;
+  padding-top:calc(24px + var(--sat));
+}
+
+.login-card{
+  width:100%;max-width:360px;
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-top:3px solid var(--green);
+  padding:32px 24px 28px;
+  position:relative;
+}
+
+.login-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:28px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+
+.login-sys{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;}
+.login-status{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);display:flex;align-items:center;gap:5px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.login-emblem{text-align:center;margin-bottom:24px;}
+.emblem-ring{
+  width:68px;height:68px;margin:0 auto 10px;
+  border:2px solid var(--border2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  position:relative;
+}
+.emblem-ring::before{
+  content:'';position:absolute;inset:-4px;
+  border:1px solid var(--green);border-radius:50%;
+  opacity:.3;
+}
+.emblem-code{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:3px;}
+.emblem-title{
+  font-family:'Orbitron',monospace;font-size:16px;font-weight:900;
+  color:var(--text);letter-spacing:1px;margin:6px 0 2px;
+}
+.emblem-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+
+.login-field{margin-bottom:14px;}
+.login-field label{
+  display:block;font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--green);letter-spacing:2px;margin-bottom:6px;
+}
+.login-field input{
+  width:100%;background:var(--bg2);
+  border:1px solid var(--border2);
+  border-left:2px solid var(--green3);
+  padding:12px 14px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  color:var(--text);outline:none;border-radius:0;
+  -webkit-appearance:none;transition:border-color .2s;
+}
+.login-field input:focus{border-left-color:var(--green);background:#141414;}
+.login-field input::placeholder{color:var(--muted);opacity:.5;}
+
+.btn-login{
+  width:100%;margin-top:6px;
+  background:var(--green);color:#000;
+  border:none;padding:13px;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;
+  cursor:pointer;border-radius:0;-webkit-appearance:none;
+  transition:all .2s;
+}
+.btn-login:hover,.btn-login:active{background:var(--green2);}
+
+.login-error{
+  background:rgba(255,23,68,.08);border-left:2px solid var(--red);
+  padding:9px 12px;margin-top:10px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:#ff6090;
+  display:none;
+}
+
+/* ═══════════════════════════
+   APP LAYOUT
+═══════════════════════════ */
+#app{
+  display:none;height:100vh;
+  flex-direction:column;
+  background:var(--bg);
+}
+
+/* ── TOP BAR ── */
+.topbar{
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px;
+  padding-top:calc(10px + var(--sat));
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+  position:relative;z-index:10;
+}
+.topbar-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--panel2);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  flex-shrink:0;
+}
+.topbar-info{flex:1;min-width:0;}
+.topbar-name{
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  color:var(--text);letter-spacing:.5px;
+}
+.topbar-file{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--muted);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-file.loaded{color:var(--green);}
+.btn-logout{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--muted);padding:5px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;
+  cursor:pointer;border-radius:2px;flex-shrink:0;
+}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* ── NAV TABS ── */
+.nav{
+  background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;overflow-x:auto;flex-shrink:0;
+  -webkit-overflow-scrolling:touch;
+}
+.nav::-webkit-scrollbar{display:none;}
+.nav-tab{
+  flex:1;min-width:60px;
+  padding:10px 6px;text-align:center;
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:.5px;
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;white-space:nowrap;
+}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.nav-tab .tab-icon{font-size:14px;display:block;margin-bottom:2px;}
+
+/* ── CONTENT ── */
+.content{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:calc(16px + var(--sab));
+}
+.content::-webkit-scrollbar{width:3px;}
+.content::-webkit-scrollbar-thumb{background:var(--border2);}
+
+.tab-pane{display:none;padding:14px;}
+.tab-pane.active{display:block;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  padding:16px;margin-bottom:12px;border-radius:2px;
+}
+.card-title{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:2px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+  margin-bottom:14px;display:flex;align-items:center;gap:6px;
+}
+.card-title .ct-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+
+/* ── UPLOAD ── */
+.upload-zone{
+  border:1px dashed var(--border2);background:var(--bg2);
+  padding:24px 16px;text-align:center;cursor:pointer;
+  position:relative;transition:all .2s;margin-bottom:10px;
+  border-radius:2px;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:#111a11;}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-ico{font-size:28px;margin-bottom:6px;}
+.upload-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);line-height:1.7;}
+.upload-txt strong{color:var(--green);}
+
+.file-card{
+  display:none;align-items:center;gap:10px;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-left:2px solid var(--green);
+  padding:10px 12px;margin-bottom:10px;
+}
+.file-card.show{display:flex;}
+.file-ico{font-size:20px;}
+.file-info{flex:1;min-width:0;}
+.file-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:1px;}
+.file-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px;}
+.file-rm:hover{color:var(--red);}
+
+/* ── FIELDS ── */
+.field{margin-bottom:12px;}
+.field label{
+  display:block;font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--green);letter-spacing:2px;margin-bottom:5px;
+}
+.field select,.field input[type=text],.field textarea{
+  width:100%;background:var(--bg2);
+  border:1px solid var(--border2);border-left:2px solid var(--green3);
+  padding:10px 12px;
+  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;
+  color:var(--text);outline:none;-webkit-appearance:none;border-radius:0;
+  transition:border-color .2s;
+}
+.field select:focus,.field input[type=text]:focus,.field textarea:focus{border-left-color:var(--green);}
+.field select option{background:var(--panel2);}
+.field textarea{resize:none;height:64px;line-height:1.4;}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);opacity:.5;}
+
+/* ── BOTONES ── */
+.btn{
+  width:100%;padding:13px;
+  font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;
+  cursor:pointer;border-radius:2px;-webkit-appearance:none;
+  transition:all .2s;border:none;
+}
+.btn-green{background:var(--green);color:#000;}
+.btn-green:hover{background:var(--green2);}
+.btn-green:disabled{opacity:.3;cursor:not-allowed;}
+.btn-outline{background:transparent;border:1px solid var(--green);color:var(--green);}
+.btn-outline:hover{background:rgba(0,230,118,.07);}
+.btn-outline:disabled{opacity:.3;cursor:not-allowed;}
+.btn-amber{background:transparent;border:1px solid var(--amber);color:var(--amber);}
+.btn-amber:hover{background:rgba(255,171,0,.07);}
+.btn-blue{background:transparent;border:1px solid var(--blue);color:var(--blue);}
+.btn-blue:hover{background:rgba(68,138,255,.07);}
+.btn-sm{padding:8px 14px;font-size:9px;letter-spacing:1px;width:auto;}
+
+/* ── PROGRESS ── */
+.progress-wrap{display:none;margin-top:12px;}.progress-wrap.show{display:block;}
+.progress-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;}
+.progress-track{background:var(--border);height:3px;border-radius:1px;}
+.progress-bar{background:var(--green);height:3px;border-radius:1px;transition:width .4s;}
+.steps{margin-top:8px;display:flex;flex-direction:column;gap:3px;}
+.step{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.step::before{content:'○';font-size:8px;}
+.step.done{color:var(--green2);}.step.done::before{content:'●';color:var(--green);}
+.step.go{color:var(--amber);}.step.go::before{content:'◉';color:var(--amber);}
+
+/* ── ALERTS ── */
+.alert{padding:10px 13px;font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.5px;margin-top:11px;display:none;line-height:1.5;border-radius:2px;}
+.alert.show{display:block;}
+.alert-ok{background:rgba(0,230,118,.06);border-left:2px solid var(--green);color:var(--green2);}
+.alert-err{background:rgba(255,23,68,.06);border-left:2px solid var(--red);color:#ff6090;}
+.alert-warn{background:rgba(255,171,0,.06);border-left:2px solid var(--amber);color:var(--amber);}
+
+/* ── DASHBOARD ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{
+  background:var(--panel2);border:1px solid var(--border);
+  padding:14px 12px;border-radius:2px;text-align:center;
+}
+.stat-num{
+  font-family:'Orbitron',monospace;font-size:22px;font-weight:700;
+  color:var(--green);margin-bottom:2px;
+}
+.stat-num.amber{color:var(--amber);}
+.stat-num.blue{color:var(--blue);}
+.stat-num.red{color:var(--red);}
+.stat-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+
+.chart-wrap{position:relative;height:220px;margin-bottom:8px;}
+.chart-wrap-bar{position:relative;height:180px;margin-bottom:8px;}
+
+.alert-item{
+  background:var(--bg2);border-left:2px solid var(--amber);
+  padding:8px 12px;margin-bottom:6px;border-radius:2px;
+}
+.alert-item-name{font-size:13px;font-weight:600;color:var(--text);}
+.alert-item-detail{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);margin-top:2px;}
+.no-alerts{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:16px;}
+
+/* ── BUSCAR ── */
+.search-bar{
+  display:flex;gap:8px;margin-bottom:12px;
+}
+.search-input{
+  flex:1;background:var(--bg2);
+  border:1px solid var(--border2);border-left:2px solid var(--green3);
+  padding:11px 13px;
+  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;
+  color:var(--text);outline:none;-webkit-appearance:none;border-radius:0;
+}
+.search-input:focus{border-left-color:var(--green);}
+.search-input::placeholder{color:var(--muted);opacity:.5;}
+
+.vig-result{
+  background:var(--panel2);border:1px solid var(--border);
+  padding:14px;margin-bottom:10px;border-radius:2px;
+}
+.vig-name{
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
+  color:var(--text);margin-bottom:4px;
+}
+.vig-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px;}
+.vig-turnos{
+  display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px;
+}
+.turno-chip{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;
+  border-radius:2px;
+}
+.turno-chip.N{background:rgba(68,138,255,.15);color:var(--blue);border:1px solid rgba(68,138,255,.3);}
+.turno-chip.S{background:rgba(255,171,0,.15);color:var(--amber);border:1px solid rgba(255,171,0,.3);}
+.turno-chip.D{background:rgba(0,230,118,.1);color:var(--green2);border:1px solid rgba(0,230,118,.2);}
+.turno-chip.day-num{
+  background:transparent;color:var(--muted);font-size:8px;
+  border:none;width:28px;height:14px;
+}
+.vig-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.vig-stat{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:8px;text-align:center;border-radius:2px;
+}
+.vig-stat-num{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;}
+.vig-stat-num.N{color:var(--blue);}
+.vig-stat-num.S{color:var(--amber);}
+.vig-stat-num.D{color:var(--green2);}
+.vig-stat-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);}
+
+.empty-search{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:24px;}
+
+/* ── CAMBIOS ── */
+.swap-form{display:flex;flex-direction:column;gap:10px;}
+.swap-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* ── NOVEDADES ── */
+.nov-item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-left:2px solid var(--amber);
+  padding:10px 12px;margin-bottom:8px;border-radius:2px;
+}
+.nov-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.nov-fecha{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber);}
+.nov-puesto{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);}
+.nov-body{font-size:13px;font-weight:600;color:var(--text);}
+.nov-detail{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.nov-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px;}
+.nov-rm:hover{color:var(--red);}
+.empty-msg{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px;}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* ── CHIP DE TURNO GRANDE ── */
+.ciclo-badge{
+  display:inline-block;
+  background:var(--panel2);border:1px solid var(--border2);
+  padding:4px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green2);
+  letter-spacing:1px;margin-top:4px;border-radius:2px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-header">
+      <span class="login-sys">LEGION-OPS // v5.0</span>
+      <span class="login-status"><span class="status-dot"></span>EN LÍNEA</span>
+    </div>
+    <div class="login-emblem">
+      <div class="emblem-ring">💀</div>
+      <div class="emblem-code">ACCESO RESTRINGIDO</div>
+      <div class="emblem-title">COMANDO MONTILLA</div>
+      <div class="emblem-sub">// SISTEMA DE PROGRAMACIÓN TÁCTICA //</div>
+    </div>
+    <div class="login-field">
+      <label>▸ ID OPERATIVO</label>
+      <input type="text" id="lu" placeholder="usuario" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>▸ CÓDIGO DE ACCESO</label>
+      <input type="password" id="lp" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">SOLICITAR ACCESO</button>
+    <div class="login-error" id="lerr">⚠ CREDENCIALES INVÁLIDAS — ACCESO DENEGADO</div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-avatar">💀</div>
+    <div class="topbar-info">
+      <div class="topbar-name">COMANDO MONTILLA</div>
+      <div class="topbar-file" id="topbar-file">Sin archivo cargado</div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">[SALIR]</button>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <div class="nav-tab active" onclick="goTab('prog')"><span class="tab-icon">📊</span>PROG</div>
+    <div class="nav-tab" onclick="goTab('dash')"><span class="tab-icon">📈</span>PANEL</div>
+    <div class="nav-tab" onclick="goTab('buscar')"><span class="tab-icon">🔍</span>BUSCAR</div>
+    <div class="nav-tab" onclick="goTab('cambio')"><span class="tab-icon">🔄</span>CAMBIOS</div>
+    <div class="nav-tab" onclick="goTab('nov')"><span class="tab-icon">📋</span>NOVEDADES</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ══ TAB PROGRAMACIÓN ══ -->
+    <div class="tab-pane active" id="tab-prog">
+
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>CARGAR EXCEL DE PROGRAMACIÓN</div>
+        <div class="upload-zone" id="uz">
+          <input type="file" accept=".xlsx,.xls" onchange="cargarArchivo(event)" id="fi"/>
+          <div class="upload-ico">📊</div>
+          <div class="upload-txt"><strong>SUBIR EXCEL</strong><br/>Toca para seleccionar el archivo</div>
+        </div>
+        <div class="file-card" id="fc">
+          <span class="file-ico">📗</span>
+          <div class="file-info">
+            <div class="file-name" id="fn">archivo.xlsx</div>
+            <div class="file-meta" id="fm">CARGADO</div>
+          </div>
+          <button class="file-rm" onclick="quitarArchivo()">✕</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>GENERAR SIGUIENTE MES</div>
+        <div class="field">
+          <label>▸ MES DESTINO</label>
+          <select id="ms">
+            <option value="7">JULIO 2026</option>
+            <option value="8">AGOSTO 2026</option>
+            <option value="9">SEPTIEMBRE 2026</option>
+            <option value="10">OCTUBRE 2026</option>
+            <option value="11">NOVIEMBRE 2026</option>
+            <option value="12">DICIEMBRE 2026</option>
+          </select>
+        </div>
+        <button class="btn btn-green" onclick="generar()" id="btn-gen" disabled>⚡ GENERAR PROGRAMACIÓN</button>
+        <div class="progress-wrap" id="pw">
+          <div class="progress-label">PROCESANDO...</div>
+          <div class="progress-track"><div class="progress-bar" id="pb" style="width:0%"></div></div>
+          <div class="steps">
+            <div class="step" id="s1">Leyendo estructura del archivo</div>
+            <div class="step" id="s2">Detectando ciclos de cada vigilante</div>
+            <div class="step" id="s3">Calculando continuidad de turnos</div>
+            <div class="step" id="s4">Actualizando fechas y días de semana</div>
+            <div class="step" id="s5">Generando archivo con formato original</div>
+          </div>
+        </div>
+        <div class="alert" id="ap"></div>
+      </div>
+
+      <button class="btn btn-outline" onclick="descargarProg()" id="btn-dl" style="display:none;margin-bottom:12px;">⬇ DESCARGAR PROGRAMACIÓN GENERADA</button>
+
+    </div>
+
+    <!-- ══ TAB DASHBOARD ══ -->
+    <div class="tab-pane" id="tab-dash">
+
+      <div class="card" id="dash-empty">
+        <div class="empty-msg">📊 Carga un Excel en la pestaña PROG<br/>para ver el panel de estadísticas</div>
+      </div>
+
+      <div id="dash-content" style="display:none;">
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="ds-total">0</div>
+            <div class="stat-label">VIGILANTES</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num amber" id="ds-puestos">0</div>
+            <div class="stat-label">PUESTOS</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num blue" id="ds-noches">0</div>
+            <div class="stat-label">TURNOS NOCHE</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="ds-dias-t">0</div>
+            <div class="stat-label">TURNOS DÍA</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>DISTRIBUCIÓN DE TURNOS</div>
+          <div class="chart-wrap">
+            <canvas id="chartDona"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>TURNOS POR PUESTO</div>
+          <div class="chart-wrap-bar">
+            <canvas id="chartBarras"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>ALERTAS DE TURNOS IRREGULARES</div>
+          <div id="alertas-list"><div class="no-alerts">✓ Sin irregularidades detectadas</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ TAB BUSCAR ══ -->
+    <div class="tab-pane" id="tab-buscar">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>BUSCAR VIGILANTE</div>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="search-input"
+            placeholder="Nombre o apellido..." oninput="buscarVigilante(this.value)"/>
+        </div>
+        <div class="alert alert-warn" id="search-warn" style="display:none;margin-top:0;">
+          Carga un Excel primero para buscar vigilantes.
+        </div>
+      </div>
+      <div id="search-results"><div class="empty-search">Escribe un nombre para buscar</div></div>
+    </div>
+
+    <!-- ══ TAB CAMBIOS ══ -->
+    <div class="tab-pane" id="tab-cambio">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>INTERCAMBIAR VIGILANTES</div>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+          Intercambia dos vigilantes de puesto. Los turnos de cada uno se asignarán al puesto del otro en el Excel.
+        </p>
+        <div class="swap-form">
+          <div class="field">
+            <label>▸ VIGILANTE A (nombre exacto)</label>
+            <input type="text" id="swap-a" placeholder="Ej: CARLOS GUZMAN"/>
+          </div>
+          <div class="field">
+            <label>▸ VIGILANTE B (nombre exacto)</label>
+            <input type="text" id="swap-b" placeholder="Ej: ANGEL JOHAN"/>
+          </div>
+          <button class="btn btn-amber" onclick="intercambiar()">🔄 INTERCAMBIAR PUESTOS</button>
+        </div>
+        <div class="alert" id="swap-alert"></div>
+      </div>
+      <button class="btn btn-outline" onclick="descargarSwap()" id="btn-swap-dl" style="display:none;margin-bottom:12px;">⬇ DESCARGAR EXCEL CON CAMBIO</button>
+    </div>
+
+    <!-- ══ TAB NOVEDADES ══ -->
+    <div class="tab-pane" id="tab-nov">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>REGISTRAR NOVEDAD</div>
+        <div class="field"><label>▸ FECHA</label><input type="text" id="nf1" placeholder="ej: 01 07 26"/></div>
+        <div class="field"><label>▸ PUESTO</label><input type="text" id="nf2" placeholder="ej: SENDEROS SECTOR 2"/></div>
+        <div class="field"><label>▸ FALTANTE — Apellido</label><input type="text" id="nf3" placeholder="Apellido"/></div>
+        <div class="field"><label>▸ FALTANTE — Nombre</label><input type="text" id="nf4" placeholder="Nombre"/></div>
+        <div class="field"><label>▸ RELEVO — Apellido</label><input type="text" id="nf5" placeholder="Apellido o N-A"/></div>
+        <div class="field"><label>▸ RELEVO — Nombre</label><input type="text" id="nf6" placeholder="Nombre o N-A"/></div>
+        <div class="field"><label>▸ CAUSAL</label><input type="text" id="nf7" placeholder="INCAPACIDAD, PERMISO, AUSENCIA..."/></div>
+        <div class="field"><label>▸ OBSERVACIONES</label><textarea id="nf8" placeholder="Detalles adicionales..."></textarea></div>
+        <button class="btn btn-amber" onclick="agregarNov()">+ REGISTRAR NOVEDAD</button>
+        <div class="alert" id="nov-alert"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>NOVEDADES REGISTRADAS</div>
+        <div id="nov-list"><div class="empty-msg">Sin novedades registradas</div></div>
+      </div>
+
+      <button class="btn btn-amber" onclick="descargarNovedades()" id="btn-nov-dl" style="display:none;margin-bottom:12px;">⬇ DESCARGAR EXCEL CON NOVEDADES</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  CONSTANTES Y ESTADO GLOBAL
+// ═══════════════════════════════════════
+const CREDS = {user:'montilla', pass:'legion2024'};
+const MESES = ['','ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+const MESES_DIAS = [0,31,28,31,30,31,30,31,31,30,31,30,31];
+const DIAS_SEM = ['D','L','M','M','J','V','S'];
+
+let archivoBytes = null;
+let archivoNombre = '';
+let diasMesBase = 30;
+let vigilantesData = []; // [{nombre, puesto, ciclo, pos, colIni, fila, turnos}]
+let puestosData = {};    // {puesto: [vigilantes]}
+let resultadoBytes = null;
+let swapBytes = null;
+let novedades = [];
+let chartDona = null;
+let chartBarras = null;
+
+// ═══════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════
+function doLogin(){
+  const u = document.getElementById('lu').value.trim().toLowerCase();
+  const p = document.getElementById('lp').value;
+  if(u === CREDS.user && p === CREDS.pass){
+    document.getElementById('login').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    app.style.flexDirection = 'column';
+    const hoy = new Date();
+    document.getElementById('nf1').value = `${String(hoy.getDate()).padStart(2,'0')} ${String(hoy.getMonth()+1).padStart(2,'0')} ${String(hoy.getFullYear()).slice(2)}`;
+  } else {
+    const e = document.getElementById('lerr');
+    e.style.display = 'block';
+    setTimeout(()=>e.style.display='none', 2800);
+  }
+}
+
+document.getElementById('lp').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('lu').addEventListener('keydown', e=>{if(e.key==='Enter')document.getElementById('lp').focus();});
+
+function doLogout(){
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('lu').value = '';
+  document.getElementById('lp').value = '';
+  quitarArchivo();
+}
+
+// ═══════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════
+function goTab(t){
+  document.querySelectorAll('.nav-tab').forEach((el,i)=>{
+    el.classList.toggle('active', ['prog','dash','buscar','cambio','nov'][i] === t);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='dash') actualizarDashboard();
+}
+
+// ═══════════════════════════════════════
+//  CARGA DE ARCHIVO
+// ═══════════════════════════════════════
+function cargarArchivo(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = function(ev){
+    archivoBytes = ev.target.result;
+    archivoNombre = f.name;
+    const wb = XLSX.read(new Uint8Array(archivoBytes), {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+    // Detectar días del mes base
+    diasMesBase = 30;
+    for(const row of data){
+      const vals = row.map(c=>String(c||'').trim());
+      const nums = vals.filter(v=>/^\d+$/.test(v) && +v>=1 && +v<=31).map(Number);
+      if(nums.length >= 20){ diasMesBase = Math.max(...nums); break; }
+    }
+
+    // Parsear vigilantes
+    parsearVigilantes(data);
+
+    document.getElementById('fn').textContent = f.name;
+    document.getElementById('fm').textContent = `${(f.size/1024).toFixed(1)} KB · ${diasMesBase} DÍAS · ${vigilantesData.length} VIGILANTES`;
+    document.getElementById('fc').classList.add('show');
+    document.getElementById('uz').style.display = 'none';
+    document.getElementById('btn-gen').disabled = false;
+    document.getElementById('topbar-file').textContent = f.name;
+    document.getElementById('topbar-file').classList.add('loaded');
+    mostrarAlerta('ap', `✓ ARCHIVO CARGADO — ${diasMesBase} DÍAS — ${vigilantesData.length} VIGILANTES DETECTADOS`, 'alert-ok');
+  };
+  r.readAsArrayBuffer(f);
+  e.target.value = '';
+}
+
+function quitarArchivo(){
+  archivoBytes = null; archivoNombre = ''; diasMesBase = 30;
+  vigilantesData = []; puestosData = {}; resultadoBytes = null; swapBytes = null;
+  document.getElementById('fc').classList.remove('show');
+  document.getElementById('fi').value = '';
+  document.getElementById('uz').style.display = 'block';
+  document.getElementById('btn-gen').disabled = true;
+  document.getElementById('btn-dl').style.display = 'none';
+  document.getElementById('btn-swap-dl').style.display = 'none';
+  document.getElementById('pw').classList.remove('show');
+  document.getElementById('topbar-file').textContent = 'Sin archivo cargado';
+  document.getElementById('topbar-file').classList.remove('loaded');
+  document.getElementById('dash-empty').style.display = 'block';
+  document.getElementById('dash-content').style.display = 'none';
+}
+
+// ═══════════════════════════════════════
+//  PARSEAR VIGILANTES
+// ═══════════════════════════════════════
+function parsearVigilantes(data){
+  vigilantesData = [];
+  puestosData = {};
+  let puestoActual = '';
+
+  data.forEach((row, ri)=>{
+    const vals = row.map(c=>String(c||'').trim());
+    const col0 = vals[0] || '';
+    const col1 = vals[1] || '';
+
+    // Detectar puesto (col A no vacía con nombre de puesto)
+    if(col0 && col0.length > 2 && !['N','S','D','L','M','J','V'].includes(col0)){
+      if(!/^\d+$/.test(col0)) puestoActual = col0;
+    }
+
+    const nombre = col1;
+    if(!nombre || nombre.length < 3) return;
+    if(/NOMBRE|APELLIDO|CELULAR|PROGRAMACION|SENDEROS/i.test(nombre)) return;
+
+    const tvRaw = [];
+    for(let ci=4; ci<=35; ci++) tvRaw.push(['N','S','D'].includes(String(row[ci]||'').trim().toUpperCase()) ? String(row[ci]).trim().toUpperCase() : '');
+    const tv = tvRaw.filter(t=>t);
+    if(tv.length < 10) return;
+
+    const tv30 = tv.slice(0, diasMesBase);
+    const ciclo = detectarCiclo(tv30);
+    const pos = tv30.length % ciclo.length;
+
+    let colIni = 4;
+    for(let ci=4; ci<=35; ci++){
+      if(['N','S','D'].includes(String(row[ci]||'').trim().toUpperCase())){ colIni=ci; break; }
+    }
+
+    const vg = {
+      nombre, puesto: puestoActual, ciclo, pos, colIni,
+      fila: ri+1, turnos: tv30,
+      celular: vals[2] || ''
+    };
+    vigilantesData.push(vg);
+
+    if(!puestosData[puestoActual]) puestosData[puestoActual] = [];
+    puestosData[puestoActual].push(vg);
+  });
+}
+
+function detectarCiclo(tv30){
+  const patron = tv30.join('');
+  for(let largo=3; largo<=9; largo++){
+    if(largo*2 > patron.length) break;
+    const cand = patron.slice(0, largo);
+    if((cand.repeat(20)).slice(0, patron.length) === patron) return cand.split('');
+  }
+  for(let largo=3; largo<=9; largo++){
+    if(largo*3 > patron.length) break;
+    const cand = patron.slice(0, largo);
+    if(patron.slice(0, largo*3) === cand.repeat(3)) return cand.split('');
+  }
+  return patron.slice(0,6).split('');
+}
+
+// ═══════════════════════════════════════
+//  GENERAR PROGRAMACIÓN
+// ═══════════════════════════════════════
+async function generar(){
+  if(!archivoBytes){ mostrarAlerta('ap','⚠ CARGA UN ARCHIVO PRIMERO.','alert-err'); return; }
+  const mes = parseInt(document.getElementById('ms').value);
+  const anio = 2026;
+  const totalDias = mes===2&&anio%4===0 ? 29 : MESES_DIAS[mes];
+  const primerDia = new Date(anio, mes-1, 1).getDay(); // 0=Dom
+
+  document.getElementById('btn-gen').disabled = true;
+  document.getElementById('btn-dl').style.display = 'none';
+  document.getElementById('pw').classList.add('show');
+  paso(1,'go'); await tick();
+
+  try{
+    const zip = await JSZip.loadAsync(archivoBytes);
+    paso(2,'go'); await tick();
+
+    let sheet1 = await zip.file('xl/worksheets/sheet1.xml').async('string');
+    let shared = await zip.file('xl/sharedStrings.xml').async('string');
+
+    // Detectar mes origen y reemplazar
+    const mesesBuscar = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+    let mesOrigen = 'JUNIO';
+    for(const m of mesesBuscar){
+      if(shared.toUpperCase().includes('PROGRAMACION '+m)){ mesOrigen=m; break; }
+    }
+    shared = shared.replace(new RegExp(mesOrigen,'gi'), MESES[mes]);
+
+    // Shared strings índices
+    const SS = (shared.match(/<si>[\s\S]*?<\/si>/g)||[]).map(si=>si.replace(/<[^>]+>/g,'').trim());
+    const tIdx = {
+      N: SS.indexOf('N') >= 0 ? SS.indexOf('N') : 16,
+      S: SS.indexOf('S') >= 0 ? SS.indexOf('S') : 9,
+      D: SS.indexOf('D') >= 0 ? SS.indexOf('D') : 10
+    };
+    const semIdx = [
+      SS.indexOf('D')>=0?SS.indexOf('D'):10,
+      SS.indexOf('L')>=0?SS.indexOf('L'):5,
+      SS.findIndex(s=>s==='M')>=0?SS.findIndex(s=>s==='M'):6,
+      SS.findIndex(s=>s==='M')>=0?SS.findIndex(s=>s==='M'):6,
+      SS.indexOf('J')>=0?SS.indexOf('J'):7,
+      SS.indexOf('V')>=0?SS.indexOf('V'):8,
+      SS.indexOf('S')>=0?SS.indexOf('S'):9
+    ];
+
+    paso(3,'go'); await tick();
+
+    // Mapear vigilantes por fila
+    const vigMap = {};
+    vigilantesData.forEach(vg=>{ vigMap[vg.fila]=vg; });
+
+    // Parsear XML
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(sheet1, 'text/xml');
+    const rows = xmlDoc.querySelectorAll('row');
+
+    paso(4,'go'); await tick();
+
+    rows.forEach(rowEl=>{
+      const ri = parseInt(rowEl.getAttribute('r'));
+      const vg = vigMap[ri];
+      const cells = Array.from(rowEl.querySelectorAll('c'));
+
+      if(vg){
+        const ciclo=vg.ciclo; const n=ciclo.length; let p=vg.pos;
+        for(let d=0; d<totalDias; d++){
+          const addr = colLetra(vg.colIni+d)+ri;
+          const turno = ciclo[p%n]; p++;
+          const cel = cells.find(c=>c.getAttribute('r')===addr);
+          if(cel){
+            let vEl = cel.querySelector('v');
+            if(!vEl){ vEl=xmlDoc.createElement('v'); cel.appendChild(vEl); }
+            vEl.textContent = String(tIdx[turno]);
+            cel.setAttribute('t','s');
+          }
+        }
+        return;
+      }
+
+      // Días de semana
+      const countDs = cells.filter(c=>{
+        const vEl=c.querySelector('v'); const t=c.getAttribute('t')||'';
+        if(!vEl||t!=='s') return false;
+        return [5,6,7,8,9,10].includes(parseInt(vEl.textContent));
+      }).length;
+      if(countDs >= 5){
+        let si = 0;
+        for(let ci=0;ci<cells.length;ci++){
+          const vEl=cells[ci].querySelector('v'); const t=cells[ci].getAttribute('t')||'';
+          if(vEl&&t==='s'&&[5,6,7,8,9,10].includes(parseInt(vEl.textContent))){ si=ci; break; }
+        }
+        for(let d=0;d<totalDias;d++){
+          const cel=cells[si+d]; if(!cel) continue;
+          let vEl=cel.querySelector('v');
+          if(!vEl){ vEl=xmlDoc.createElement('v'); cel.appendChild(vEl); }
+          vEl.textContent=String(semIdx[(primerDia+d)%7]);
+          cel.setAttribute('t','s');
+        }
+        return;
+      }
+
+      // Números de día
+      const numCells = cells.filter(c=>{
+        const vEl=c.querySelector('v'); const t=c.getAttribute('t')||'';
+        if(!vEl||t==='s') return false;
+        const v=parseInt(vEl.textContent); return v>=1&&v<=31;
+      });
+      if(numCells.length >= 10){
+        let si=0;
+        for(let ci=0;ci<cells.length;ci++){
+          const vEl=cells[ci].querySelector('v'); const t=cells[ci].getAttribute('t')||'';
+          if(vEl&&t!=='s'){ const v=parseInt(vEl.textContent); if(v>=1&&v<=31){si=ci;break;} }
+        }
+        for(let d=0;d<totalDias;d++){
+          const cel=cells[si+d]; if(!cel) continue;
+          let vEl=cel.querySelector('v');
+          if(!vEl){ vEl=xmlDoc.createElement('v'); cel.appendChild(vEl); }
+          vEl.textContent=String(d+1);
+          cel.removeAttribute('t');
+        }
+      }
+    });
+
+    paso(5,'go'); await tick();
+
+    const s = new XMLSerializer();
+    zip.file('xl/worksheets/sheet1.xml', s.serializeToString(xmlDoc));
+    zip.file('xl/sharedStrings.xml', shared);
+    resultadoBytes = await zip.generateAsync({type:'arraybuffer',compression:'DEFLATE',compressionOptions:{level:6}});
+
+    paso(5,'done');
+    document.getElementById('pb').style.width = '100%';
+    document.getElementById('btn-dl').style.display = 'block';
+    document.getElementById('btn-gen').disabled = false;
+    mostrarAlerta('ap', `✓ MISIÓN CUMPLIDA — ${vigilantesData.length} VIGILANTES — PROGRAMACIÓN ${MESES[mes]} LISTA`, 'alert-ok');
+
+  } catch(err){
+    console.error(err);
+    document.getElementById('btn-gen').disabled = false;
+    mostrarAlerta('ap', '⚠ ERROR AL PROCESAR. VERIFICA QUE SEA UN EXCEL VÁLIDO (.xlsx).', 'alert-err');
+    paso(1,'');
+  }
+}
+
+function descargarProg(){
+  if(!resultadoBytes) return;
+  const mes = parseInt(document.getElementById('ms').value);
+  descargarBlob(resultadoBytes, `PROGRAMACION_${MESES[mes]}_2026.xlsx`);
+}
+
+// ═══════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════
+function actualizarDashboard(){
+  if(!vigilantesData.length){
+    document.getElementById('dash-empty').style.display='block';
+    document.getElementById('dash-content').style.display='none';
+    return;
+  }
+  document.getElementById('dash-empty').style.display='none';
+  document.getElementById('dash-content').style.display='block';
+
+  // Conteos globales
+  let totalN=0, totalS=0, totalD=0;
+  vigilantesData.forEach(vg=>{
+    vg.turnos.forEach(t=>{ if(t==='N')totalN++; else if(t==='S')totalS++; else if(t==='D')totalD++; });
+  });
+
+  document.getElementById('ds-total').textContent = vigilantesData.length;
+  document.getElementById('ds-puestos').textContent = Object.keys(puestosData).length;
+  document.getElementById('ds-noches').textContent = totalN;
+  document.getElementById('ds-dias-t').textContent = totalD;
+
+  // Gráfico dona
+  if(chartDona) chartDona.destroy();
+  const ctxD = document.getElementById('chartDona').getContext('2d');
+  chartDona = new Chart(ctxD, {
+    type: 'doughnut',
+    data: {
+      labels: ['Noche (N)', 'Descanso (S)', 'Día (D)'],
+      datasets:[{
+        data: [totalN, totalS, totalD],
+        backgroundColor: ['rgba(68,138,255,.7)','rgba(255,171,0,.7)','rgba(0,230,118,.7)'],
+        borderColor: ['#448aff','#ffab00','#00e676'],
+        borderWidth: 1
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          position:'bottom',
+          labels:{ color:'#9e9e9e', font:{family:'Share Tech Mono',size:10}, padding:12 }
+        }
+      },
+      cutout:'65%'
+    }
+  });
+
+  // Gráfico barras por puesto (top 8)
+  const puestosList = Object.entries(puestosData).slice(0,8);
+  const pNombres = puestosList.map(([p])=>p.length>10?p.slice(0,10)+'..':p);
+  const pN=[],pS=[],pD=[];
+  puestosList.forEach(([,vgs])=>{
+    let n=0,s=0,d=0;
+    vgs.forEach(vg=>vg.turnos.forEach(t=>{if(t==='N')n++;else if(t==='S')s++;else if(t==='D')d++;}));
+    pN.push(n); pS.push(s); pD.push(d);
+  });
+
+  if(chartBarras) chartBarras.destroy();
+  const ctxB = document.getElementById('chartBarras').getContext('2d');
+  chartBarras = new Chart(ctxB, {
+    type: 'bar',
+    data:{
+      labels: pNombres,
+      datasets:[
+        {label:'Noche',data:pN,backgroundColor:'rgba(68,138,255,.6)',borderColor:'#448aff',borderWidth:1},
+        {label:'Descanso',data:pS,backgroundColor:'rgba(255,171,0,.6)',borderColor:'#ffab00',borderWidth:1},
+        {label:'Día',data:pD,backgroundColor:'rgba(0,230,118,.6)',borderColor:'#00e676',borderWidth:1}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ ticks:{color:'#616161',font:{family:'Share Tech Mono',size:8}}, grid:{color:'#1e1e1e'} },
+        y:{ ticks:{color:'#616161',font:{family:'Share Tech Mono',size:8}}, grid:{color:'#1e1e1e'} }
+      },
+      plugins:{ legend:{labels:{color:'#9e9e9e',font:{family:'Share Tech Mono',size:9},padding:8}} }
+    }
+  });
+
+  // Alertas irregularidades
+  const alertasList = document.getElementById('alertas-list');
+  const irregulares = [];
+  vigilantesData.forEach(vg=>{
+    const n=vg.turnos.filter(t=>t==='N').length;
+    const s=vg.turnos.filter(t=>t==='S').length;
+    const d=vg.turnos.filter(t=>t==='D').length;
+    const total=n+s+d;
+    // Alerta si algún tipo de turno es 0 y total > 0
+    if(total>0 && (n===0||s===0||d===0)){
+      irregulares.push({nombre:vg.nombre,puesto:vg.puesto,n,s,d,total});
+    }
+  });
+
+  if(irregulares.length===0){
+    alertasList.innerHTML='<div class="no-alerts">✓ Sin irregularidades detectadas</div>';
+  } else {
+    alertasList.innerHTML = irregulares.map(ir=>`
+      <div class="alert-item">
+        <div class="alert-item-name">${ir.nombre}</div>
+        <div class="alert-item-detail">${ir.puesto} | N:${ir.n} S:${ir.s} D:${ir.d} | Total:${ir.total}</div>
+      </div>`).join('');
+  }
+}
+
+// ═══════════════════════════════════════
+//  BUSCAR VIGILANTE
+// ═══════════════════════════════════════
+function buscarVigilante(query){
+  const results = document.getElementById('search-results');
+  if(!vigilantesData.length){
+    document.getElementById('search-warn').style.display='block';
+    results.innerHTML='';
+    return;
+  }
+  document.getElementById('search-warn').style.display='none';
+  query = query.trim().toUpperCase();
+  if(!query){ results.innerHTML='<div class="empty-search">Escribe un nombre para buscar</div>'; return; }
+
+  const encontrados = vigilantesData.filter(vg=>vg.nombre.toUpperCase().includes(query));
+  if(!encontrados.length){
+    results.innerHTML='<div class="empty-search">Sin resultados para "'+query+'"</div>';
+    return;
+  }
+
+  results.innerHTML = encontrados.map(vg=>{
+    const n=vg.turnos.filter(t=>t==='N').length;
+    const s=vg.turnos.filter(t=>t==='S').length;
+    const d=vg.turnos.filter(t=>t==='D').length;
+    const cicloStr=''.concat(...vg.ciclo);
+    const chips = vg.turnos.map((t,i)=>`<div class="turno-chip ${t}">${t}</div>`).join('');
+    return `
+    <div class="vig-result">
+      <div class="vig-name">${vg.nombre}</div>
+      <div class="vig-meta">📍 ${vg.puesto||'Sin puesto'} ${vg.celular?'· 📱 '+vg.celular:''}</div>
+      <div class="ciclo-badge">CICLO: ${''.concat(...vg.ciclo)} (${vg.ciclo.length} días)</div>
+      <div style="margin:10px 0 4px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;">TURNOS DEL MES</div>
+      <div class="vig-turnos">${chips}</div>
+      <div class="vig-stats">
+        <div class="vig-stat"><div class="vig-stat-num N">${n}</div><div class="vig-stat-label">NOCHES</div></div>
+        <div class="vig-stat"><div class="vig-stat-num S">${s}</div><div class="vig-stat-label">DESCANSOS</div></div>
+        <div class="vig-stat"><div class="vig-stat-num D">${d}</div><div class="vig-stat-label">DÍAS</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+//  INTERCAMBIAR VIGILANTES
+// ═══════════════════════════════════════
+function intercambiar(){
+  if(!archivoBytes){ mostrarAlerta('swap-alert','⚠ Carga un archivo Excel primero.','alert-err'); return; }
+  const nombreA = document.getElementById('swap-a').value.trim().toUpperCase();
+  const nombreB = document.getElementById('swap-b').value.trim().toUpperCase();
+  if(!nombreA||!nombreB){ mostrarAlerta('swap-alert','⚠ Ingresa los nombres de ambos vigilantes.','alert-err'); return; }
+
+  const vgA = vigilantesData.find(v=>v.nombre.toUpperCase()===nombreA);
+  const vgB = vigilantesData.find(v=>v.nombre.toUpperCase()===nombreB);
+  if(!vgA){ mostrarAlerta('swap-alert',`⚠ No se encontró: ${nombreA}`, 'alert-err'); return; }
+  if(!vgB){ mostrarAlerta('swap-alert',`⚠ No se encontró: ${nombreB}`, 'alert-err'); return; }
+
+  // Intercambiar puestos en memoria
+  const puestoTmp = vgA.puesto;
+  vgA.puesto = vgB.puesto;
+  vgB.puesto = puestoTmp;
+
+  // Intercambiar turnos (los turnos siguen al vigilante, el puesto cambia)
+  const turnosTmp = [...vgA.turnos];
+  vgA.turnos = [...vgB.turnos];
+  vgB.turnos = turnosTmp;
+
+  const cicloTmp = [...vgA.ciclo];
+  vgA.ciclo = [...vgB.ciclo];
+  vgB.ciclo = cicloTmp;
+
+  const posTmp = vgA.pos;
+  vgA.pos = vgB.pos;
+  vgB.pos = posTmp;
+
+  // Generar Excel con el intercambio aplicado usando JSZip
+  generarSwap(vgA, vgB);
+}
+
+async function generarSwap(vgA, vgB){
+  try{
+    const zip = await JSZip.loadAsync(archivoBytes);
+    let sheet1 = await zip.file('xl/worksheets/sheet1.xml').async('string');
+    let shared = await zip.file('xl/sharedStrings.xml').async('string');
+
+    const SS = (shared.match(/<si>[\s\S]*?<\/si>/g)||[]).map(si=>si.replace(/<[^>]+>/g,'').trim());
+    const tIdx = {
+      N: SS.indexOf('N')>=0?SS.indexOf('N'):16,
+      S: SS.indexOf('S')>=0?SS.indexOf('S'):9,
+      D: SS.indexOf('D')>=0?SS.indexOf('D'):10
+    };
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(sheet1,'text/xml');
+    const rows = xmlDoc.querySelectorAll('row');
+
+    // Actualizar las dos filas intercambiadas
+    [vgA, vgB].forEach(vg=>{
+      rows.forEach(rowEl=>{
+        if(parseInt(rowEl.getAttribute('r')) !== vg.fila) return;
+        const cells = Array.from(rowEl.querySelectorAll('c'));
+        vg.turnos.forEach((t,d)=>{
+          const addr = colLetra(vg.colIni+d)+vg.fila;
+          const cel = cells.find(c=>c.getAttribute('r')===addr);
+          if(cel){
+            let vEl=cel.querySelector('v');
+            if(!vEl){ vEl=xmlDoc.createElement('v'); cel.appendChild(vEl); }
+            vEl.textContent=String(tIdx[t]);
+            cel.setAttribute('t','s');
+          }
+        });
+      });
+    });
+
+    const s = new XMLSerializer();
+    zip.file('xl/worksheets/sheet1.xml', s.serializeToString(xmlDoc));
+    swapBytes = await zip.generateAsync({type:'arraybuffer',compression:'DEFLATE',compressionOptions:{level:6}});
+
+    document.getElementById('btn-swap-dl').style.display='block';
+    mostrarAlerta('swap-alert',`✓ INTERCAMBIO APLICADO — ${vgA.nombre} ↔ ${vgB.nombre}`, 'alert-ok');
+  } catch(err){
+    console.error(err);
+    mostrarAlerta('swap-alert','⚠ Error al aplicar el intercambio.','alert-err');
+  }
+}
+
+function descargarSwap(){
+  if(!swapBytes) return;
+  descargarBlob(swapBytes, 'PROGRAMACION_INTERCAMBIO.xlsx');
+}
+
+// ═══════════════════════════════════════
+//  NOVEDADES
+// ═══════════════════════════════════════
+function agregarNov(){
+  const f=g('nf1'), p=g('nf2'), fa=g('nf3'), c=g('nf7');
+  if(!f||!p||!fa||!c){ mostrarAlerta('nov-alert','⚠ FECHA, PUESTO, APELLIDO Y CAUSAL SON OBLIGATORIOS.','alert-err'); return; }
+  novedades.push({
+    id:Date.now(), fecha:f, puesto:p, faltaAp:fa, faltaNom:g('nf4'),
+    relevAp:g('nf5')||'N-A', relevNom:g('nf6')||'N-A', causal:c, obs:g('nf8')
+  });
+  renderNov();
+  ['nf1','nf2','nf3','nf4','nf5','nf6','nf7','nf8'].forEach(id=>document.getElementById(id).value='');
+  mostrarAlerta('nov-alert','✓ NOVEDAD REGISTRADA.','alert-ok');
+  document.getElementById('btn-nov-dl').style.display='block';
+}
+
+function renderNov(){
+  const list = document.getElementById('nov-list');
+  if(!novedades.length){ list.innerHTML='<div class="empty-msg">Sin novedades registradas</div>'; return; }
+  list.innerHTML = novedades.map(n=>`
+    <div class="nov-item">
+      <div class="nov-header">
+        <span class="nov-fecha">${n.fecha}</span>
+        <span class="nov-puesto">${n.puesto}</span>
+        <button class="nov-rm" onclick="elimNov(${n.id})">✕</button>
+      </div>
+      <div class="nov-body">FALTANTE: ${n.faltaAp} ${n.faltaNom}</div>
+      <div class="nov-detail">RELEVO: ${n.relevAp} ${n.relevNom} | ${n.causal}${n.obs?' | '+n.obs:''}</div>
+    </div>`).join('');
+}
+
+function elimNov(id){
+  novedades = novedades.filter(n=>n.id!==id);
+  renderNov();
+  if(!novedades.length) document.getElementById('btn-nov-dl').style.display='none';
+}
+
+async function descargarNovedades(){
+  if(!novedades.length) return;
+
+  // Si hay Excel base, escribir en la pestaña REPORTE NOVEDADES
+  if(archivoBytes){
+    try{
+      const zip = await JSZip.loadAsync(archivoBytes);
+      // Usar XLSX para leer y modificar la hoja 2
+      const wb = XLSX.read(new Uint8Array(archivoBytes), {type:'array', cellStyles:true});
+      const sheetNov = wb.SheetNames.find(s=>s.toUpperCase().includes('NOVEDAD')) || wb.SheetNames[1];
+      if(sheetNov){
+        const ws = wb.Sheets[sheetNov];
+        const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        let lastRow = data.length + 1;
+        // Encontrar primera fila vacía real
+        for(let i=data.length-1; i>=0; i--){
+          if(data[i].some(c=>String(c||'').trim())){ lastRow=i+2; break; }
+        }
+        novedades.forEach((n,i)=>{
+          const fila = lastRow + i;
+          const set=(col,val)=>{ ws[`${col}${fila}`]={t:'s',v:String(val),w:String(val)}; };
+          set('A',n.fecha); set('B',n.puesto);
+          set('D',n.faltaAp); set('E',n.faltaNom);
+          set('F',n.relevAp); set('G',n.relevNom);
+          set('I',n.causal); set('J',n.obs);
+        });
+        const rng = XLSX.utils.decode_range(ws['!ref']||'A1:J1');
+        rng.e.r = Math.max(rng.e.r, lastRow + novedades.length - 1);
+        ws['!ref'] = XLSX.utils.encode_range(rng);
+        const out = XLSX.write(wb, {bookType:'xlsx', type:'array', cellStyles:true});
+        descargarBlob(out, 'PROGRAMACION_CON_NOVEDADES.xlsx');
+        return;
+      }
+    } catch(err){ console.error('Error escribiendo novedades en Excel:', err); }
+  }
+
+  // Fallback: Excel nuevo
+  const wb = XLSX.utils.book_new();
+  const aoa = [
+    ['SISTEMA INTEGRADO DE GESTIÓN 9 ONCE','','OBRA','','FECHA'],
+    [],[],['NOVEDADES GENERALES'],
+    ['FECHA','PUESTO','UNIDAD FALTANTE','','','UNIDAD DE RELEVO','','','CAUSAL','OBSERVACIONES'],
+    ['','','CEDULA','APELLIDO','NOMBRE','APELLIDO','NOMBRE','CEDULA','',''],
+    ...novedades.map(n=>[n.fecha,n.puesto,'',n.faltaAp,n.faltaNom,n.relevAp,n.relevNom,'',n.causal,n.obs])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  XLSX.utils.book_append_sheet(wb, 'REPORTE NOVEDADES', ws);
+  descargarBlob(XLSX.write(wb,{bookType:'xlsx',type:'array'}), 'REPORTE_NOVEDADES.xlsx');
+}
+
+// ═══════════════════════════════════════
+//  UTILIDADES
+// ═══════════════════════════════════════
+function colLetra(n){
+  let s='', c=n;
+  while(c>=0){ s=String.fromCharCode(65+(c%26))+s; c=Math.floor(c/26)-1; }
+  return s;
+}
+
+function descargarBlob(bytes, nombre){
+  const blob = new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=nombre;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function paso(n, estado){
+  for(let i=1;i<=5;i++) document.getElementById('s'+i).className='step'+(i<n?' done':i===n?' '+estado:'');
+  document.getElementById('pb').style.width=(n/5*100)+'%';
+}
+
+function mostrarAlerta(id, msg, clase){
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'alert show ' + clase;
+  setTimeout(()=>el.classList.remove('show'), 7000);
+}
+
+function g(id){ return document.getElementById(id).value.trim(); }
+function tick(){ return new Promise(r=>setTimeout(r,80)); }
+</script>
+</body>
+</html>
